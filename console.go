@@ -35,6 +35,6 @@ func (l *streamLogger) Fatal(message string) {
 
 func (l *streamLogger) print(sev severity, message string) {
 	if currentSeverity.ge(sev) {
-		fmt.Fprintf(l.out, "%v %v: %v\n", sev.String(), time.Now().UTC().Format(time.StampMilli), message)
+		fmt.Fprintf(l.out, "%v %v: %v\n", sev, time.Now().UTC().Format(time.StampMilli), message)
 	}
 }

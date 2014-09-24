@@ -41,8 +41,8 @@ func (s *severity) ge(val severity) bool {
 	return val >= s.get()
 }
 
-func (s *severity) String() string {
-	switch *s {
+func (s severity) String() string {
+	switch s {
 	case SeverityInfo:
 		return "INFO"
 	case SeverityWarn:
