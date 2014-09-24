@@ -29,17 +29,25 @@ func getAppName() string {
 }
 
 func (l *sysLogger) Info(message string) {
-	l.writer.Info(message)
+	if currentSeverity.ge(SeverityInfo) {
+		l.writer.Info(message)
+	}
 }
 
 func (l *sysLogger) Warning(message string) {
-	l.writer.Warning(message)
+	if currentSeverity.ge(SeverityWarn) {
+		l.writer.Warning(message)
+	}
 }
 
 func (l *sysLogger) Error(message string) {
-	l.writer.Err(message)
+	if currentSeverity.ge(SeverityError) {
+		l.writer.Err(message)
+	}
 }
 
 func (l *sysLogger) Fatal(message string) {
-	l.writer.Emerg(message)
+	if currentSeverity.ge(SeverityFatal) {
+		l.writer.Emerg(message)
+	}
 }

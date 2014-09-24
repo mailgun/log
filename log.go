@@ -6,13 +6,57 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync/atomic"
 )
 
 var loggers []Logger
 
 var pid = os.Getpid()
+var currentSeverity severity
 
-// Unified interface for all loggers.
+// severity implementation is borowed from glog, uses sync/atomic int32
+type severity int32
+
+const (
+	SeverityInfo severity = iota
+	SeverityWarn
+	SeverityError
+	SeverityFatal
+)
+
+var severityName = []string{}
+
+// get returns the value of the severity.
+func (s *severity) get() severity {
+	return severity(atomic.LoadInt32((*int32)(s)))
+}
+
+// set sets the value of the severity.
+func (s *severity) set(val severity) {
+	atomic.StoreInt32((*int32)(s), int32(val))
+}
+
+// less returns if the passed severity is greater or equal than passed severity.
+func (s *severity) ge(val severity) bool {
+	return val >= s.get()
+}
+
+func (s *severity) String() string {
+	switch *s {
+	case SeverityInfo:
+		return "INFO"
+	case SeverityWarn:
+		return "WARNING"
+	case SeverityError:
+		return "ERROR"
+	case SeverityFatal:
+		return "FATAL"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+// Logger is a unified interface for all loggers.
 type Logger interface {
 	Info(string)
 	Warning(string)
@@ -25,6 +69,11 @@ type logger struct{}
 // Logging configuration to be passed to all loggers during initialization.
 type LogConfig struct {
 	Name string
+}
+
+// SetSeverity sets current logging severity. Acceptable values are SeverityInfo, SeverityWarn, SeverityError, SeverityFatal
+func SetSeverity(s severity) {
+	currentSeverity.set(s)
 }
 
 // Loggin initialization, must be called at the beginning of your cool app.

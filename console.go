@@ -2,33 +2,39 @@ package log
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"time"
 )
 
 // Console logger is for dev mode, it prints the logs to the terminal.
 // Note: don't use this logger in production.
-type consoleLogger struct{}
+type streamLogger struct {
+	out io.Writer
+}
 
 func NewConsoleLogger(config *LogConfig) (Logger, error) {
-	return &consoleLogger{}, nil
+	return &streamLogger{out: os.Stdout}, nil
 }
 
-func (l *consoleLogger) Info(message string) {
-	l.Print("INFO ", message)
+func (l *streamLogger) Info(message string) {
+	l.print(SeverityInfo, message)
 }
 
-func (l *consoleLogger) Warning(message string) {
-	l.Print("WARN ", message)
+func (l *streamLogger) Warning(message string) {
+	l.print(SeverityWarn, message)
 }
 
-func (l *consoleLogger) Error(message string) {
-	l.Print("ERROR", message)
+func (l *streamLogger) Error(message string) {
+	l.print(SeverityError, message)
 }
 
-func (l *consoleLogger) Fatal(message string) {
-	l.Print("FATAL", message)
+func (l *streamLogger) Fatal(message string) {
+	l.print(SeverityFatal, message)
 }
 
-func (l *consoleLogger) Print(severity string, message string) {
-	fmt.Printf("%v %v: %v\n", severity, time.Now().UTC().Format(time.StampMilli), message)
+func (l *streamLogger) print(sev severity, message string) {
+	if currentSeverity.ge(sev) {
+		fmt.Fprintf(l.out, "%v %v: %v\n", sev.String(), time.Now().UTC().Format(time.StampMilli), message)
+	}
 }
