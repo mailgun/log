@@ -24,8 +24,6 @@ const (
 	SeverityFatal
 )
 
-var severityName = []string{}
-
 // get returns the value of the severity.
 func (s *severity) get() severity {
 	return severity(atomic.LoadInt32((*int32)(s)))
@@ -36,9 +34,9 @@ func (s *severity) set(val severity) {
 	atomic.StoreInt32((*int32)(s), int32(val))
 }
 
-// less returns if the passed severity is greater or equal than passed severity.
-func (s *severity) ge(val severity) bool {
-	return val >= s.get()
+// less returns if this severity is greater than passed severity
+func (s *severity) gt(val severity) bool {
+	return s.get() > val
 }
 
 func (s severity) String() string {
@@ -101,7 +99,10 @@ func newLogger(config *LogConfig) (Logger, error) {
 
 // Infof logs to the INFO log.
 func Infof(format string, args ...interface{}) {
-	message := makeMessage(format, args...)
+	if currentSeverity.gt(SeverityInfo) {
+		return
+	}
+	message := makeMessage(currentSeverity, format, args...)
 	for _, logger := range loggers {
 		logger.Info(message)
 	}
@@ -109,7 +110,10 @@ func Infof(format string, args ...interface{}) {
 
 // Warningf logs to the WARNING and INFO logs.
 func Warningf(format string, args ...interface{}) {
-	message := makeMessage(format, args...)
+	if currentSeverity.gt(SeverityWarn) {
+		return
+	}
+	message := makeMessage(currentSeverity, format, args...)
 	for _, logger := range loggers {
 		logger.Warning(message)
 	}
@@ -117,7 +121,10 @@ func Warningf(format string, args ...interface{}) {
 
 // Errorf logs to the ERROR, WARNING, and INFO logs.
 func Errorf(format string, args ...interface{}) {
-	message := makeMessage(format, args...)
+	if currentSeverity.gt(SeverityError) {
+		return
+	}
+	message := makeMessage(currentSeverity, format, args...)
 	for _, logger := range loggers {
 		logger.Error(message)
 	}
@@ -126,17 +133,20 @@ func Errorf(format string, args ...interface{}) {
 // Fatalf logs to the FATAL, ERROR, WARNING, and INFO logs,
 // including a stack trace of all running goroutines, then calls os.Exit(255).
 func Fatalf(format string, args ...interface{}) {
-	message := makeMessage(format, args...)
+	if currentSeverity.gt(SeverityFatal) {
+		return
+	}
+	message := makeMessage(currentSeverity, format, args...)
 	stacks := stackTraces()
 	for _, logger := range loggers {
-		logger.Error(message)
-		logger.Error(stacks)
+		logger.Fatal(message)
+		logger.Fatal(stacks)
 	}
 
 	exit()
 }
 
-func makeMessage(format string, args ...interface{}) string {
+func makeMessage(sev severity, format string, args ...interface{}) string {
 	file, line := callerInfo()
 	return fmt.Sprintf("PID:%d [%s:%d] %s", pid, file, line, fmt.Sprintf(format, args...))
 }

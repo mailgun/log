@@ -11,6 +11,14 @@ type LogSuite struct{}
 
 var _ = Suite(&LogSuite{})
 
+func (s *LogSuite) SetUpTest(c *C) {
+	runtimeCaller = func(skip int) (pc uintptr, file string, line int, ok bool) {
+		return 0, "", 0, false
+	}
+	// mock exit function
+	exit = func() {}
+}
+
 func (s *LogSuite) SetUpSuite(c *C) {
 	consoleConfig := &LogConfig{Name: "console"}
 	syslogConfig := &LogConfig{Name: "syslog"}
@@ -44,21 +52,11 @@ func (s *LogSuite) TestErrorf(c *C) {
 }
 
 func (s *LogSuite) TestFatalf(c *C) {
-	// mock exit function
-	exit = func() {}
+
 	Fatalf("test message, %v", "fatal")
 }
 
 func (s *LogSuite) TestCallerInfoError(c *C) {
-	// mock runtime.Caller and then revert it back for other tests
-	origRuntimeCaller := runtimeCaller
-	defer func() {
-		runtimeCaller = origRuntimeCaller
-	}()
-
-	runtimeCaller = func(skip int) (pc uintptr, file string, line int, ok bool) {
-		return 0, "", 0, false
-	}
 	file, line := callerInfo()
 	c.Assert(file, Equals, "unknown")
 	c.Assert(line, Equals, 0)

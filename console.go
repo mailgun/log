@@ -7,34 +7,31 @@ import (
 	"time"
 )
 
-// Console logger is for dev mode, it prints the logs to the terminal.
-// Note: don't use this logger in production.
-type streamLogger struct {
-	out io.Writer
+// writerLogger outputs the logs to the underlying writer
+type writerLogger struct {
+	w io.Writer
 }
 
 func NewConsoleLogger(config *LogConfig) (Logger, error) {
-	return &streamLogger{out: os.Stdout}, nil
+	return &writerLogger{w: os.Stdout}, nil
 }
 
-func (l *streamLogger) Info(message string) {
+func (l *writerLogger) Info(message string) {
 	l.print(SeverityInfo, message)
 }
 
-func (l *streamLogger) Warning(message string) {
+func (l *writerLogger) Warning(message string) {
 	l.print(SeverityWarn, message)
 }
 
-func (l *streamLogger) Error(message string) {
+func (l *writerLogger) Error(message string) {
 	l.print(SeverityError, message)
 }
 
-func (l *streamLogger) Fatal(message string) {
+func (l *writerLogger) Fatal(message string) {
 	l.print(SeverityFatal, message)
 }
 
-func (l *streamLogger) print(sev severity, message string) {
-	if currentSeverity.ge(sev) {
-		fmt.Fprintf(l.out, "%v %v: %v\n", sev, time.Now().UTC().Format(time.StampMilli), message)
-	}
+func (l *writerLogger) print(sev severity, message string) {
+	fmt.Fprintf(l.w, "%v %v: %v\n", sev, time.Now().UTC().Format(time.StampMilli), message)
 }
