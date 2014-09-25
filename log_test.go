@@ -2,6 +2,7 @@ package log
 
 import (
 	. "gopkg.in/check.v1"
+	"io/ioutil"
 	"testing"
 )
 
@@ -23,6 +24,11 @@ func (s *LogSuite) SetUpSuite(c *C) {
 	consoleConfig := &LogConfig{Name: "console"}
 	syslogConfig := &LogConfig{Name: "syslog"}
 	Init([]*LogConfig{consoleConfig, syslogConfig})
+	for _, l := range loggers {
+		if cl, ok := l.(*writerLogger); ok {
+			cl.w = ioutil.Discard
+		}
+	}
 }
 
 func (s *LogSuite) TestInit(c *C) {

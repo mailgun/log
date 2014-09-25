@@ -14,7 +14,7 @@ var loggers []Logger
 var pid = os.Getpid()
 var currentSeverity severity
 
-// severity implementation is borowed from glog, uses sync/atomic int32
+// severity implementation is borrowed from glog, uses sync/atomic int32
 type severity int32
 
 const (
@@ -50,7 +50,7 @@ func (s severity) String() string {
 	case SeverityFatal:
 		return "FATAL"
 	default:
-		return "UNKNOWN"
+		return "UNKNOWN SEVERITY"
 	}
 }
 
