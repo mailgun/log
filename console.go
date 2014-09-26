@@ -32,6 +32,6 @@ func (l *writerLogger) Fatal(message string) {
 	l.print(SeverityFatal, message)
 }
 
-func (l *writerLogger) print(sev severity, message string) {
+func (l *writerLogger) print(sev Severity, message string) {
 	fmt.Fprintf(l.w, "%v %v: %v\n", sev, time.Now().UTC().Format(time.StampMilli), message)
 }

@@ -12,34 +12,34 @@ import (
 var loggers []Logger
 
 var pid = os.Getpid()
-var currentSeverity severity
+var currentSeverity Severity
 
-// severity implementation is borrowed from glog, uses sync/atomic int32
-type severity int32
+// Severity implementation is borrowed from glog, uses sync/atomic int32
+type Severity int32
 
 const (
-	SeverityInfo severity = iota
+	SeverityInfo Severity = iota
 	SeverityWarn
 	SeverityError
 	SeverityFatal
 )
 
 // get returns the value of the severity.
-func (s *severity) get() severity {
-	return severity(atomic.LoadInt32((*int32)(s)))
+func (s *Severity) Get() Severity {
+	return Severity(atomic.LoadInt32((*int32)(s)))
 }
 
 // set sets the value of the severity.
-func (s *severity) set(val severity) {
+func (s *Severity) Set(val Severity) {
 	atomic.StoreInt32((*int32)(s), int32(val))
 }
 
 // less returns if this severity is greater than passed severity
-func (s *severity) gt(val severity) bool {
-	return s.get() > val
+func (s *Severity) Gt(val Severity) bool {
+	return s.Get() > val
 }
 
-func (s severity) String() string {
+func (s Severity) String() string {
 	switch s {
 	case SeverityInfo:
 		return "INFO"
@@ -70,8 +70,8 @@ type LogConfig struct {
 }
 
 // SetSeverity sets current logging severity. Acceptable values are SeverityInfo, SeverityWarn, SeverityError, SeverityFatal
-func SetSeverity(s severity) {
-	currentSeverity.set(s)
+func SetSeverity(s Severity) {
+	currentSeverity.Set(s)
 }
 
 // Loggin initialization, must be called at the beginning of your cool app.
@@ -99,7 +99,7 @@ func newLogger(config *LogConfig) (Logger, error) {
 
 // Infof logs to the INFO log.
 func Infof(format string, args ...interface{}) {
-	if currentSeverity.gt(SeverityInfo) {
+	if currentSeverity.Gt(SeverityInfo) {
 		return
 	}
 	message := makeMessage(currentSeverity, format, args...)
@@ -110,7 +110,7 @@ func Infof(format string, args ...interface{}) {
 
 // Warningf logs to the WARNING and INFO logs.
 func Warningf(format string, args ...interface{}) {
-	if currentSeverity.gt(SeverityWarn) {
+	if currentSeverity.Gt(SeverityWarn) {
 		return
 	}
 	message := makeMessage(currentSeverity, format, args...)
@@ -121,7 +121,7 @@ func Warningf(format string, args ...interface{}) {
 
 // Errorf logs to the ERROR, WARNING, and INFO logs.
 func Errorf(format string, args ...interface{}) {
-	if currentSeverity.gt(SeverityError) {
+	if currentSeverity.Gt(SeverityError) {
 		return
 	}
 	message := makeMessage(currentSeverity, format, args...)
@@ -133,7 +133,7 @@ func Errorf(format string, args ...interface{}) {
 // Fatalf logs to the FATAL, ERROR, WARNING, and INFO logs,
 // including a stack trace of all running goroutines, then calls os.Exit(255).
 func Fatalf(format string, args ...interface{}) {
-	if currentSeverity.gt(SeverityFatal) {
+	if currentSeverity.Gt(SeverityFatal) {
 		return
 	}
 	message := makeMessage(currentSeverity, format, args...)
@@ -146,7 +146,7 @@ func Fatalf(format string, args ...interface{}) {
 	exit()
 }
 
-func makeMessage(sev severity, format string, args ...interface{}) string {
+func makeMessage(sev Severity, format string, args ...interface{}) string {
 	file, line := callerInfo()
 	return fmt.Sprintf("PID:%d [%s:%d] %s", pid, file, line, fmt.Sprintf(format, args...))
 }
