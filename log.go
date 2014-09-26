@@ -84,6 +84,11 @@ func SetSeverity(s Severity) {
 	currentSeverity.Set(s)
 }
 
+// GetSeverity returns currently set severity.
+func GetSeverity() Severity {
+	return currentSeverity
+}
+
 // Loggin initialization, must be called at the beginning of your cool app.
 func Init(logConfigs []*LogConfig) error {
 	for _, config := range logConfigs {

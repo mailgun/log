@@ -14,11 +14,16 @@ type LogSuite struct{}
 var _ = Suite(&LogSuite{})
 
 func (s *LogSuite) SetUpTest(c *C) {
+	// mock exit function
 	runtimeCaller = func(skip int) (pc uintptr, file string, line int, ok bool) {
 		return 0, "", 0, false
 	}
-	// mock exit function
 	exit = func() {}
+	SetSeverity(SeverityInfo)
+}
+
+func (s *LogSuite) TearDownTest(c *C) {
+	SetSeverity(SeverityInfo)
 }
 
 func (s *LogSuite) SetUpSuite(c *C) {
@@ -66,6 +71,13 @@ func (s *LogSuite) TestCallerInfoError(c *C) {
 	file, line := callerInfo()
 	c.Assert(file, Equals, "unknown")
 	c.Assert(line, Equals, 0)
+}
+
+func (s *LogSuite) TestGetSetSeverity(c *C) {
+	for sev, _ := range severityName {
+		SetSeverity(sev)
+		c.Assert(GetSeverity(), Equals, sev)
+	}
 }
 
 func (s *LogSuite) TestSeverityFromString(c *C) {
