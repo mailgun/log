@@ -67,3 +67,17 @@ func (s *LogSuite) TestCallerInfoError(c *C) {
 	c.Assert(file, Equals, "unknown")
 	c.Assert(line, Equals, 0)
 }
+
+func (s *LogSuite) TestSeverityFromString(c *C) {
+	for sev, name := range severityName {
+		out, err := SeverityFromString(name)
+		c.Assert(err, IsNil)
+		c.Assert(out, Equals, sev)
+	}
+}
+
+func (s *LogSuite) TestSeverityToString(c *C) {
+	for sev, name := range severityName {
+		c.Assert(sev.String(), Equals, name)
+	}
+}

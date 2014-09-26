@@ -24,6 +24,13 @@ const (
 	SeverityFatal
 )
 
+var severityName = map[Severity]string{
+	SeverityInfo:  "INFO",
+	SeverityWarn:  "WARN",
+	SeverityError: "ERROR",
+	SeverityFatal: "FATAL",
+}
+
 // get returns the value of the severity.
 func (s *Severity) Get() Severity {
 	return Severity(atomic.LoadInt32((*int32)(s)))
@@ -40,18 +47,21 @@ func (s *Severity) Gt(val Severity) bool {
 }
 
 func (s Severity) String() string {
-	switch s {
-	case SeverityInfo:
-		return "INFO"
-	case SeverityWarn:
-		return "WARNING"
-	case SeverityError:
-		return "ERROR"
-	case SeverityFatal:
-		return "FATAL"
-	default:
+	n, ok := severityName[s]
+	if !ok {
 		return "UNKNOWN SEVERITY"
 	}
+	return n
+}
+
+func SeverityFromString(s string) (Severity, error) {
+	s = strings.ToUpper(s)
+	for k, val := range severityName {
+		if val == s {
+			return k, nil
+		}
+	}
+	return -1, fmt.Errorf("unsupported severity: %s", s)
 }
 
 // Logger is a unified interface for all loggers.

@@ -46,7 +46,7 @@ func (s *ConsoleLogSuite) TestInfo(c *C) {
 
 func (s *ConsoleLogSuite) TestWarning(c *C) {
 	Warningf("test message")
-	c.Assert(s.output(), Matches, "WARNING.*test message.*\n")
+	c.Assert(s.output(), Matches, "WARN.*test message.*\n")
 }
 
 func (s *ConsoleLogSuite) TestError(c *C) {
