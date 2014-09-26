@@ -1,9 +1,10 @@
 package log
 
 import (
-	. "gopkg.in/check.v1"
 	"io/ioutil"
 	"testing"
+
+	. "gopkg.in/check.v1"
 )
 
 func TestModel(t *testing.T) { TestingT(t) }
@@ -58,7 +59,6 @@ func (s *LogSuite) TestErrorf(c *C) {
 }
 
 func (s *LogSuite) TestFatalf(c *C) {
-
 	Fatalf("test message, %v", "fatal")
 }
 
