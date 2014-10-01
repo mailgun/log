@@ -163,7 +163,7 @@ func Fatalf(format string, args ...interface{}) {
 
 func makeMessage(sev Severity, format string, args ...interface{}) string {
 	file, line := callerInfo()
-	return fmt.Sprintf("PID:%d [%s:%d] %s", pid, file, line, fmt.Sprintf(format, args...))
+	return fmt.Sprintf("PID:%d [%s:%d] %s %s", pid, file, line, sev, fmt.Sprintf(format, args...))
 }
 
 // Return stack traces of all the running goroutines.
