@@ -17,21 +17,21 @@ func NewConsoleLogger(config *LogConfig) (Logger, error) {
 }
 
 func (l *writerLogger) Info(message string) {
-	l.print(SeverityInfo, message)
+	l.print(message)
 }
 
 func (l *writerLogger) Warning(message string) {
-	l.print(SeverityWarn, message)
+	l.print(message)
 }
 
 func (l *writerLogger) Error(message string) {
-	l.print(SeverityError, message)
+	l.print(message)
 }
 
 func (l *writerLogger) Fatal(message string) {
-	l.print(SeverityFatal, message)
+	l.print(message)
 }
 
-func (l *writerLogger) print(sev Severity, message string) {
-	fmt.Fprintf(l.w, "%v %v: %v\n", sev, time.Now().UTC().Format(time.StampMilli), message)
+func (l *writerLogger) print(message string) {
+	fmt.Fprintf(l.w, "%v: %v\n", time.Now().UTC().Format(time.StampMilli), message)
 }

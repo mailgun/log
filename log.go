@@ -117,7 +117,7 @@ func Infof(format string, args ...interface{}) {
 	if currentSeverity.Gt(SeverityInfo) {
 		return
 	}
-	message := makeMessage(currentSeverity, format, args...)
+	message := makeMessage(SeverityInfo, format, args...)
 	for _, logger := range loggers {
 		logger.Info(message)
 	}
@@ -128,7 +128,7 @@ func Warningf(format string, args ...interface{}) {
 	if currentSeverity.Gt(SeverityWarn) {
 		return
 	}
-	message := makeMessage(currentSeverity, format, args...)
+	message := makeMessage(SeverityWarn, format, args...)
 	for _, logger := range loggers {
 		logger.Warning(message)
 	}
@@ -139,7 +139,7 @@ func Errorf(format string, args ...interface{}) {
 	if currentSeverity.Gt(SeverityError) {
 		return
 	}
-	message := makeMessage(currentSeverity, format, args...)
+	message := makeMessage(SeverityError, format, args...)
 	for _, logger := range loggers {
 		logger.Error(message)
 	}
@@ -151,7 +151,7 @@ func Fatalf(format string, args ...interface{}) {
 	if currentSeverity.Gt(SeverityFatal) {
 		return
 	}
-	message := makeMessage(currentSeverity, format, args...)
+	message := makeMessage(SeverityFatal, format, args...)
 	stacks := stackTraces()
 	for _, logger := range loggers {
 		logger.Fatal(message)
@@ -163,7 +163,7 @@ func Fatalf(format string, args ...interface{}) {
 
 func makeMessage(sev Severity, format string, args ...interface{}) string {
 	file, line := callerInfo()
-	return fmt.Sprintf("PID:%d [%s:%d] %s %s", pid, file, line, sev, fmt.Sprintf(format, args...))
+	return fmt.Sprintf("%s PID:%d [%s:%d] %s", sev, pid, file, line, fmt.Sprintf(format, args...))
 }
 
 // Return stack traces of all the running goroutines.
