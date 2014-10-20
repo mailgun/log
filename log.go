@@ -79,6 +79,10 @@ type LogConfig struct {
 	Name string
 }
 
+func (c LogConfig) String() string {
+	return fmt.Sprintf("LogConfig(Name=%v)", c.Name)
+}
+
 // SetSeverity sets current logging severity. Acceptable values are SeverityInfo, SeverityWarn, SeverityError, SeverityFatal
 func SetSeverity(s Severity) {
 	currentSeverity.Set(s)
