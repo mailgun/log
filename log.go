@@ -93,7 +93,7 @@ func GetSeverity() Severity {
 	return currentSeverity
 }
 
-// Loggin initialization, must be called at the beginning of your cool app.
+// Logging initialization, must be called at the beginning of your cool app.
 func Init(logConfigs []*LogConfig) error {
 	for _, config := range logConfigs {
 		logger, err := newLogger(config)
