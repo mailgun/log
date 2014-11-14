@@ -29,7 +29,8 @@ func (s *LogSuite) TearDownTest(c *C) {
 func (s *LogSuite) SetUpSuite(c *C) {
 	consoleConfig := &LogConfig{Name: "console"}
 	syslogConfig := &LogConfig{Name: "syslog"}
-	Init([]*LogConfig{consoleConfig, syslogConfig})
+	err := Init([]*LogConfig{consoleConfig, syslogConfig})
+	c.Assert(err, IsNil)
 	for _, l := range loggers {
 		if cl, ok := l.(*writerLogger); ok {
 			cl.w = ioutil.Discard
@@ -37,18 +38,11 @@ func (s *LogSuite) SetUpSuite(c *C) {
 	}
 }
 
-func (s *LogSuite) TestInit(c *C) {
-	consoleConfig := &LogConfig{Name: "console"}
-	syslogConfig := &LogConfig{Name: "syslog"}
-
-	err := Init([]*LogConfig{consoleConfig, syslogConfig})
-	c.Assert(err, IsNil)
-}
-
 func (s *LogSuite) TestInitError(c *C) {
 	unknownConfig := &LogConfig{Name: "unknown"}
 	err := Init([]*LogConfig{unknownConfig})
 	c.Assert(err, NotNil)
+	c.Assert(loggers, HasLen, 2)
 }
 
 func (s *LogSuite) TestInfof(c *C) {
@@ -74,7 +68,7 @@ func (s *LogSuite) TestCallerInfoError(c *C) {
 }
 
 func (s *LogSuite) TestGetSetSeverity(c *C) {
-	for sev, _ := range severityName {
+	for sev := range severityName {
 		SetSeverity(sev)
 		c.Assert(GetSeverity(), Equals, sev)
 	}
