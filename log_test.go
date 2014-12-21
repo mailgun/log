@@ -31,7 +31,7 @@ func (s *LogSuite) SetUpSuite(c *C) {
 	syslogConfig := &LogConfig{Name: "syslog"}
 	err := Init([]*LogConfig{consoleConfig, syslogConfig})
 	c.Assert(err, IsNil)
-	for _, l := range loggers {
+	for _, l := range logger.loggers {
 		if cl, ok := l.(*writerLogger); ok {
 			cl.w = ioutil.Discard
 		}
@@ -42,7 +42,7 @@ func (s *LogSuite) TestInitError(c *C) {
 	unknownConfig := &LogConfig{Name: "unknown"}
 	err := Init([]*LogConfig{unknownConfig})
 	c.Assert(err, NotNil)
-	c.Assert(loggers, HasLen, 2)
+	c.Assert(logger.loggers, HasLen, 2)
 }
 
 func (s *LogSuite) TestInfof(c *C) {
@@ -62,7 +62,7 @@ func (s *LogSuite) TestFatalf(c *C) {
 }
 
 func (s *LogSuite) TestCallerInfoError(c *C) {
-	file, line := callerInfo()
+	file, line := callerInfo(3)
 	c.Assert(file, Equals, "unknown")
 	c.Assert(line, Equals, 0)
 }

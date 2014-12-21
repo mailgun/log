@@ -16,7 +16,7 @@ var _ = Suite(&ConsoleLogSuite{})
 func (s *ConsoleLogSuite) SetUpTest(c *C) {
 	SetSeverity(SeverityInfo)
 	s.out = &bytes.Buffer{}
-	loggers = []Logger{&writerLogger{w: s.out}}
+	logger.loggers = []Logger{&writerLogger{w: s.out}}
 	runtimeCaller = func(skip int) (pc uintptr, file string, line int, ok bool) {
 		return 0, "", 0, false
 	}
@@ -24,7 +24,7 @@ func (s *ConsoleLogSuite) SetUpTest(c *C) {
 }
 
 func (s *ConsoleLogSuite) TearDownTest(c *C) {
-	loggers = []Logger{}
+	logger.loggers = []Logger{}
 	SetSeverity(SeverityError)
 }
 
