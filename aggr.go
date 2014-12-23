@@ -1,65 +1,87 @@
 package log
 
-// aggrLoger outputs the logs to the underlying writer
-type aggrLogger struct {
+import (
+	"io"
+)
+
+// fanOutLoger outputs the logs to the underlying logger
+type fanOutLogger struct {
 	loggers []Logger
+
+	info  io.Writer
+	warn  io.Writer
+	err   io.Writer
+	fatal io.Writer
 }
 
-func (l *aggrLogger) add(lg Logger) {
+func newFanOut() *fanOutLogger {
+	fl := &fanOutLogger{
+		loggers: []Logger{},
+	}
+	fl.info = &fanOutWriter{l: fl, sev: SeverityInfo}
+	fl.warn = &fanOutWriter{l: fl, sev: SeverityWarn}
+	fl.err = &fanOutWriter{l: fl, sev: SeverityError}
+	fl.fatal = &fanOutWriter{l: fl, sev: SeverityFatal}
+	return fl
+}
+
+func (l *fanOutLogger) add(lg Logger) {
 	l.loggers = append(l.loggers, lg)
 }
 
-func (l *aggrLogger) infof(depth int, format string, args ...interface{}) {
+func (l *fanOutLogger) Writer(sev Severity) io.Writer {
+	switch sev {
+	case SeverityInfo:
+		return l.info
+	case SeverityWarn:
+		return l.warn
+	default:
+		return l.err
+	}
+}
+
+func (l *fanOutLogger) Infof(format string, args ...interface{}) {
 	if currentSeverity.Gt(SeverityInfo) {
 		return
 	}
-	for _, logger := range l.loggers {
-		logger.infof(depth+1, format, args...)
-	}
+	infof(1, l.info, format, args...)
 }
 
-func (l *aggrLogger) warningf(depth int, format string, args ...interface{}) {
+func (l *fanOutLogger) Warningf(format string, args ...interface{}) {
 	if currentSeverity.Gt(SeverityWarn) {
 		return
 	}
-	for _, logger := range l.loggers {
-		logger.warningf(depth+1, format, args...)
-	}
+	warningf(1, l.warn, format, args...)
 }
 
-func (l *aggrLogger) errorf(depth int, format string, args ...interface{}) {
+func (l *fanOutLogger) Errorf(format string, args ...interface{}) {
 	if currentSeverity.Gt(SeverityError) {
 		return
 	}
-	for _, logger := range l.loggers {
-		logger.errorf(depth+1, format, args...)
-	}
+	errorf(1, l.err, format, args...)
 }
 
-func (l *aggrLogger) fatalf(depth int, format string, args ...interface{}) {
+func (l *fanOutLogger) Fatalf(format string, args ...interface{}) {
 	if currentSeverity.Gt(SeverityFatal) {
 		return
 	}
-	for _, logger := range l.loggers {
-		logger.fatalf(depth+1, format, args...)
-	}
+	fatalf(1, l.fatal, format, args...)
 	exit()
 }
 
-func (l *aggrLogger) Infof(format string, args ...interface{}) {
-	l.infof(1, format, args...)
+var logger = newFanOut()
+
+type fanOutWriter struct {
+	sev Severity
+	l   *fanOutLogger
 }
 
-func (l *aggrLogger) Warningf(format string, args ...interface{}) {
-	l.warningf(1, format, args...)
+func (w *fanOutWriter) Write(val []byte) (ln int, err error) {
+	for i := range w.l.loggers {
+		ln, err = w.l.loggers[i].Writer(w.sev).Write(val)
+		if err != nil {
+			return ln, err
+		}
+	}
+	return ln, err
 }
-
-func (l *aggrLogger) Errorf(format string, args ...interface{}) {
-	l.errorf(1, format, args...)
-}
-
-func (l *aggrLogger) Fatalf(format string, args ...interface{}) {
-	l.fatalf(1, format, args...)
-}
-
-var logger = &aggrLogger{loggers: []Logger{}}
