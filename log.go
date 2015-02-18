@@ -132,7 +132,7 @@ func Warningf(format string, args ...interface{}) {
 
 // Errorf logs to the ERROR, WARNING, and INFO logs.
 func Errorf(format string, args ...interface{}) {
-	errorf(1, logger.warn, format, args...)
+	errorf(1, logger.err, format, args...)
 }
 
 // Fatalf logs to the FATAL, ERROR, WARNING, and INFO logs,
