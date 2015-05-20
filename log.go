@@ -113,6 +113,8 @@ func NewLogger(config *LogConfig) (Logger, error) {
 		return NewConsoleLogger(config)
 	case "syslog":
 		return NewSysLogger(config)
+	case "udplog":
+		return NewUDPLogger(config)
 	}
 	return nil, errors.New(fmt.Sprintf("Unknown logger: %v", config))
 }
