@@ -1,41 +1,37 @@
 package log
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
+	"fmt"
 	"net"
-	"os"
 	"time"
 )
 
 const (
-	DefaultAddr = "127.0.0.1:55647"
+	DefaultHost = "127.0.0.1"
+	DefaultPort = 55647
+
+	DefaultCategory = "go_logging"
 )
 
-type record struct {
-	App       string   `json:"appname"`
-	Host      string   `json:"hostname"`
-	Sev       Severity `json:"loglevel"`
+type udpLogRecord struct {
+	AppName   string   `json:"appname"`
+	HostName  string   `json:"hostname"`
+	LogLevel  Severity `json:"logLevel"`
+	FileName  string   `json:"filename"`
+	FuncName  string   `json:"funcName"`
+	LineNo    int      `json:"lineno"`
 	Message   []byte   `json:"message"`
 	Timestamp int64    `json:"timestamp"`
 }
 
+// udpLoggers is a type of writerLogger that sends messages in a special format to a udplog server.
 type udpLogger struct {
-	info *udpLogWriter
-	warn *udpLogWriter
-	err  *udpLogWriter
+	*writerLogger
 }
 
-type udpLogWriter struct {
-	conn *net.UDPConn
-	app  string
-	host string
-	sev  Severity
-}
-
-func NewUDPLogger(config *LogConfig) (Logger, error) {
-	addr, err := net.ResolveUDPAddr("udp", DefaultAddr)
+func NewUDPLogger(conf LogConfig) (Logger, error) {
+	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%s", DefaultHost, DefaultPort))
 	if err != nil {
 		return nil, err
 	}
@@ -45,56 +41,17 @@ func NewUDPLogger(config *LogConfig) (Logger, error) {
 		return nil, err
 	}
 
-	host, err := os.Hostname()
+	return &udpLogger{&writerLogger{conf.Severity, conn}}, nil
+}
+
+func (l *udpLogger) FormatMessage(sev Severity, fileName, funcName string, lineNo int, format string, args ...interface{}) string {
+	rec := &udpLogRecord{
+		appname, hostname, sev, fileName, funcName, lineNo, fmt.Sprintf(format, args...), time.Now().UnixNano() / 1000000}
+
+	dump, err := json.Marshal(rec)
 	if err != nil {
-		return nil, err
+		return ""
 	}
 
-	return &udpLogger{
-		&udpLogWriter{conn, getAppName(), host, SeverityInfo},
-		&udpLogWriter{conn, getAppName(), host, SeverityWarn},
-		&udpLogWriter{conn, getAppName(), host, SeverityError},
-	}, nil
-}
-
-func (l *udpLogger) Writer(sev Severity) io.Writer {
-	switch sev {
-	case SeverityInfo:
-		return l.info
-	case SeverityWarn:
-		return l.warn
-	default:
-		return l.err
-	}
-}
-
-func (l *udpLogger) Infof(format string, args ...interface{}) {
-	infof(1, l.Writer(SeverityInfo), format, args...)
-}
-
-func (l *udpLogger) Warningf(format string, args ...interface{}) {
-	warningf(1, l.Writer(SeverityWarn), format, args...)
-}
-
-func (l *udpLogger) Errorf(format string, args ...interface{}) {
-	errorf(1, l.Writer(SeverityError), format, args...)
-}
-
-func (l *udpLogger) Fatalf(format string, args ...interface{}) {
-	fatalf(1, l.Writer(SeverityFatal), format, args...)
-}
-
-func (l *udpLogWriter) Write(msg []byte) (int, error) {
-	record := &record{l.app, l.host, l.sev, msg, time.Now().UnixNano() / 1000000}
-
-	dump, err := json.Marshal(record)
-	if err != nil {
-		return 0, err
-	}
-
-	buf := bytes.Buffer{}
-	buf.Write([]byte("go_udplog:\t"))
-	buf.Write(dump)
-
-	return l.conn.Write(buf.Bytes())
+	return fmt.Sprintf("%s:%s", DefaultCategory, dump)
 }
