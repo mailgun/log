@@ -27,25 +27,25 @@ func (s *LogSuite) TestInit(c *C) {
 }
 
 func (s *LogSuite) TestInitWithConfig(c *C) {
-	InitWithConfig(LogConfig{ConsoleLoggerName, "info"}, LogConfig{SysLoggerName, "info"})
+	InitWithConfig(Config{ConsoleLoggerName, "info"}, Config{SysLoggerName, "info"})
 	c.Assert(loggers[0].String(), Equals, "consoleLogger(INFO)")
 	c.Assert(loggers[1].String(), Equals, "sysLogger(INFO)")
 }
 
 func (s *LogSuite) TestNewLogger(c *C) {
-	l, err := NewLogger(LogConfig{ConsoleLoggerName, "info"})
+	l, err := NewLogger(Config{ConsoleLoggerName, "info"})
 	c.Assert(err, IsNil)
 	c.Assert(l.String(), Equals, "consoleLogger(INFO)")
 
-	l, err = NewLogger(LogConfig{SysLoggerName, "warn"})
+	l, err = NewLogger(Config{SysLoggerName, "warn"})
 	c.Assert(err, IsNil)
 	c.Assert(l.String(), Equals, "sysLogger(WARN)")
 
-	l, err = NewLogger(LogConfig{UDPLoggerName, "error"})
+	l, err = NewLogger(Config{UDPLoggerName, "error"})
 	c.Assert(err, IsNil)
 	c.Assert(l.String(), Equals, "udpLogger(ERROR)")
 
-	l, err = NewLogger(LogConfig{"SuperDuperLogger", "info"})
+	l, err = NewLogger(Config{"SuperDuperLogger", "info"})
 	c.Assert(err, NotNil)
 	c.Assert(l, IsNil)
 }
@@ -103,7 +103,7 @@ func (l *testLogger) Writer(sev Severity) io.Writer {
 	return l.b
 }
 
-func (l *testLogger) FormatMessage(sev Severity, caller *callerInfo, format string, args ...interface{}) string {
+func (l *testLogger) FormatMessage(sev Severity, caller *CallerInfo, format string, args ...interface{}) string {
 	return fmt.Sprintf("%s %s\n", sev, fmt.Sprintf(format, args...))
 }
 

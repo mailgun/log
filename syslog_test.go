@@ -60,7 +60,7 @@ func (s *SysLoggerSuite) TestSeverity(c *C) {
 }
 
 func (s *SysLoggerSuite) TestNewSysLogger(c *C) {
-	l, err := NewSysLogger(LogConfig{SysLoggerName, "info"})
+	l, err := NewSysLogger(Config{SysLoggerName, "info"})
 	c.Assert(err, IsNil)
 	c.Assert(l, NotNil)
 

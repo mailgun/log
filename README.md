@@ -8,7 +8,7 @@ Usage
 
 The mailgun/log package supports chains of loggers where the same message can go to multiple logging channels simultaneously, for example, the standard output and syslog.
 
-Currently, the following loggers are supported: console (stdout), syslog and updlog. The latter implies having udplog server (https://github.com/mochi/udplog) running locally. Custom loggers can implement the package's `Logger` interface and be intergated into the logger chain.
+Currently, the following loggers are supported: console (stdout), syslog and updlog. The latter requires having udplog server (https://github.com/mochi/udplog) running locally. Custom loggers can implement the package's `Logger` interface and be intergated into the logger chain.
 
 Before using the package it should be initialized at the start of a program. It can be done in two ways.
 
@@ -20,7 +20,7 @@ import "github.com/mailgun/log"
 func main() {
   // create a console logger
   console, _ := log.NewLogger(LogConfig{"console", "info"})
-  
+
   // create a syslogger
   syslog, _ := log.NewLogger(LogConfig{"syslog", "error"})
 

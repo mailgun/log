@@ -17,7 +17,7 @@ type sysLogger struct {
 	errorW io.Writer
 }
 
-func NewSysLogger(conf LogConfig) (Logger, error) {
+func NewSysLogger(conf Config) (Logger, error) {
 	infoW, err := syslog.New(syslog.LOG_MAIL|syslog.LOG_INFO, appname)
 	if err != nil {
 		return nil, err
@@ -69,8 +69,8 @@ func (l *sysLogger) Writer(sev Severity) io.Writer {
 	return nil
 }
 
-func (l *sysLogger) FormatMessage(sev Severity, caller *callerInfo, format string, args ...interface{}) string {
-	return fmt.Sprintf("%s PID:%d [%s:%d:%s] %s", sev, pid, caller.fileName, caller.lineNo, caller.funcName, fmt.Sprintf(format, args...))
+func (l *sysLogger) FormatMessage(sev Severity, caller *CallerInfo, format string, args ...interface{}) string {
+	return fmt.Sprintf("%s PID:%d [%s:%d:%s] %s", sev, pid, caller.FileName, caller.LineNo, caller.FuncName, fmt.Sprintf(format, args...))
 }
 
 func (l sysLogger) String() string {

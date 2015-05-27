@@ -32,7 +32,7 @@ type udpLogger struct {
 	*writerLogger
 }
 
-func NewUDPLogger(conf LogConfig) (Logger, error) {
+func NewUDPLogger(conf Config) (Logger, error) {
 	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%v", DefaultHost, DefaultPort))
 	if err != nil {
 		return nil, err
@@ -51,9 +51,9 @@ func NewUDPLogger(conf LogConfig) (Logger, error) {
 	return &udpLogger{&writerLogger{sev, conn}}, nil
 }
 
-func (l *udpLogger) FormatMessage(sev Severity, caller *callerInfo, format string, args ...interface{}) string {
+func (l *udpLogger) FormatMessage(sev Severity, caller *CallerInfo, format string, args ...interface{}) string {
 	rec := &udpLogRecord{
-		appname, hostname, sev.String(), caller.filePath, caller.funcName, caller.lineNo, fmt.Sprintf(format, args...), float64(time.Now().UnixNano()) / 1000000000}
+		appname, hostname, sev.String(), caller.FilePath, caller.FuncName, caller.LineNo, fmt.Sprintf(format, args...), float64(time.Now().UnixNano()) / 1000000000}
 
 	dump, err := json.Marshal(rec)
 	if err != nil {

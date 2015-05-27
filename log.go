@@ -23,13 +23,13 @@ type Logger interface {
 
 	// FormatMessage constructs and returns a final message that will go a logger's
 	// output channel.
-	FormatMessage(Severity, *callerInfo, string, ...interface{}) string
+	FormatMessage(Severity, *CallerInfo, string, ...interface{}) string
 
 	String() string
 }
 
-// LogConfig represents a configuration of an individual logger.
-type LogConfig struct {
+// Config represents a configuration of an individual logger.
+type Config struct {
 	// Name is a logger's identificator used to instantiate a proper logger type
 	// from a config.
 	Name string
@@ -38,8 +38,8 @@ type LogConfig struct {
 	Severity string
 }
 
-func (c LogConfig) String() string {
-	return fmt.Sprintf("LogConfig(Name=%v, Severity=%v)", c.Name, c.Severity)
+func (c Config) String() string {
+	return fmt.Sprintf("Config(Name=%v, Severity=%v)", c.Name, c.Severity)
 }
 
 // Init initializes the logging package with the provided loggers.
@@ -51,8 +51,8 @@ func Init(l ...Logger) {
 
 // InitWithConfig instantiates loggers based on the provided configs and initializes
 // the package with them.
-func InitWithConfig(logConfigs ...LogConfig) error {
-	for _, config := range logConfigs {
+func InitWithConfig(configs ...Config) error {
+	for _, config := range configs {
 		l, err := NewLogger(config)
 		if err != nil {
 			return err
@@ -63,7 +63,7 @@ func InitWithConfig(logConfigs ...LogConfig) error {
 }
 
 // NewLogger makes a proper logger from the given configuration.
-func NewLogger(config LogConfig) (Logger, error) {
+func NewLogger(config Config) (Logger, error) {
 	switch config.Name {
 	case ConsoleLoggerName:
 		return NewConsoleLogger(config)

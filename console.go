@@ -34,9 +34,9 @@ func (l *writerLogger) Writer(sev Severity) io.Writer {
 	return nil
 }
 
-func (l *writerLogger) FormatMessage(sev Severity, caller *callerInfo, format string, args ...interface{}) string {
+func (l *writerLogger) FormatMessage(sev Severity, caller *CallerInfo, format string, args ...interface{}) string {
 	return fmt.Sprintf("%v %s %s PID:%d [%s:%d:%s] %s\n",
-		time.Now().UTC().Format(time.StampMilli), appname, sev, pid, caller.fileName, caller.lineNo, caller.funcName, fmt.Sprintf(format, args...))
+		time.Now().UTC().Format(time.StampMilli), appname, sev, pid, caller.FileName, caller.LineNo, caller.FuncName, fmt.Sprintf(format, args...))
 }
 
 func (l writerLogger) String() string {
@@ -50,7 +50,7 @@ type consoleLogger struct {
 	*writerLogger
 }
 
-func NewConsoleLogger(conf LogConfig) (Logger, error) {
+func NewConsoleLogger(conf Config) (Logger, error) {
 	sev, err := SeverityFromString(conf.Severity)
 	if err != nil {
 		return nil, err

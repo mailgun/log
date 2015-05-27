@@ -12,7 +12,7 @@ type UDPLoggerSuite struct {
 var _ = Suite(&UDPLoggerSuite{})
 
 func (s *UDPLoggerSuite) TestNewUDPLogger(c *C) {
-	l, err := NewUDPLogger(LogConfig{UDPLoggerName, "info"})
+	l, err := NewUDPLogger(Config{UDPLoggerName, "info"})
 	c.Assert(err, IsNil)
 	c.Assert(l, NotNil)
 
@@ -22,11 +22,11 @@ func (s *UDPLoggerSuite) TestNewUDPLogger(c *C) {
 }
 
 func (s *UDPLoggerSuite) TestFormatMessage(c *C) {
-	l, _ := NewUDPLogger(LogConfig{UDPLoggerName, "info"})
+	l, _ := NewUDPLogger(Config{UDPLoggerName, "info"})
 
 	udplog := l.(*udpLogger)
 
-	message := udplog.FormatMessage(SeverityInfo, &callerInfo{"filename", "filepath", "funcname", 42}, "hello %s", "world")
+	message := udplog.FormatMessage(SeverityInfo, &CallerInfo{"filename", "filepath", "funcname", 42}, "hello %s", "world")
 	c.Assert(strings.HasPrefix(message, DefaultCategory), Equals, true)
 	c.Assert(strings.Contains(message, "filepath"), Equals, true)
 	c.Assert(strings.Contains(message, "funcname"), Equals, true)

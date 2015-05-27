@@ -59,7 +59,7 @@ type ConsoleLoggerSuite struct {
 var _ = Suite(&ConsoleLoggerSuite{})
 
 func (s *ConsoleLoggerSuite) TestNewConsoleLogger(c *C) {
-	l, err := NewConsoleLogger(LogConfig{ConsoleLoggerName, "info"})
+	l, err := NewConsoleLogger(Config{ConsoleLoggerName, "info"})
 	c.Assert(err, IsNil)
 	c.Assert(l, NotNil)
 

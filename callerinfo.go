@@ -7,36 +7,32 @@ import (
 	"strings"
 )
 
-const (
-	UnknownFile = "unknown_file"
-	UnknownPath = "unknown_path"
-	UnknownFunc = "unknown_func"
-)
-
 var (
 	pid         = os.Getpid()
 	hostname, _ = os.Hostname()
 	appname     = filepath.Base(os.Args[0])
 )
 
-type callerInfo struct {
-	fileName string
-	filePath string
-	funcName string
-	lineNo   int
+// CallerInfo encapsulates information about a piece of code that called a certain log function,
+// such as file name, line number, etc.
+type CallerInfo struct {
+	FileName string
+	FilePath string
+	FuncName string
+	LineNo   int
 }
 
 // getCallerInfo returns information about a certain log function invoker
 // such as file name, function name and line number
-func getCallerInfo(depth int) *callerInfo {
+func getCallerInfo(depth int) *CallerInfo {
 	if pc, filePath, lineNo, ok := runtime.Caller(depth + 1); !ok {
-		return &callerInfo{UnknownFile, UnknownPath, UnknownFunc, 0}
+		return &CallerInfo{"unknown_file", "unknown_path", "unknown_func", 0}
 	} else {
 		var fileName string
 		slashPos := strings.LastIndex(filePath, "/")
 		if slashPos >= 0 {
 			fileName = filePath[slashPos+1:]
 		}
-		return &callerInfo{fileName, filePath, runtime.FuncForPC(pc).Name(), lineNo}
+		return &CallerInfo{fileName, filePath, runtime.FuncForPC(pc).Name(), lineNo}
 	}
 }
