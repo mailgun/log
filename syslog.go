@@ -41,20 +41,16 @@ func NewSysLogger(conf LogConfig) (Logger, error) {
 	return &sysLogger{sev, infoW, warnW, errorW}, nil
 }
 
-func (l *sysLogger) Infof(format string, args ...interface{}) {
+func (l *sysLogger) Info(format string, args ...interface{}) {
 	writeMessage(l, 1, SeverityInfo, format, args...)
 }
 
-func (l *sysLogger) Warnf(format string, args ...interface{}) {
-	writeMessage(l, 1, SeverityWarn, format, args...)
+func (l *sysLogger) Warning(format string, args ...interface{}) {
+	writeMessage(l, 1, SeverityWarning, format, args...)
 }
 
-func (l *sysLogger) Errorf(format string, args ...interface{}) {
+func (l *sysLogger) Error(format string, args ...interface{}) {
 	writeMessage(l, 1, SeverityError, format, args...)
-}
-
-func (l *sysLogger) Fatalf(format string, args ...interface{}) {
-	writeMessage(l, 1, SeverityFatal, format, args...)
 }
 
 func (l *sysLogger) Writer(sev Severity) io.Writer {
@@ -64,7 +60,7 @@ func (l *sysLogger) Writer(sev Severity) io.Writer {
 		switch sev {
 		case SeverityInfo:
 			return l.infoW
-		case SeverityWarn:
+		case SeverityWarning:
 			return l.warnW
 		default:
 			return l.errorW

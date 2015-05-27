@@ -40,10 +40,3 @@ func getCallerInfo(depth int) *callerInfo {
 		return &callerInfo{fileName, filePath, runtime.FuncForPC(pc).Name(), lineNo}
 	}
 }
-
-// getStackTraces returns stack traces of all running goroutines.
-func getStackTraces() string {
-	trace := make([]byte, 100000)
-	nbytes := runtime.Stack(trace, true)
-	return string(trace[:nbytes])
-}

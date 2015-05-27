@@ -3,7 +3,6 @@ package log
 import (
 	"bytes"
 	"os"
-	"strings"
 
 	. "gopkg.in/check.v1"
 )
@@ -24,24 +23,19 @@ func (s *WriterLoggerSuite) output() string {
 	return s.w.String()
 }
 
-func (s *WriterLoggerSuite) TestInfof(c *C) {
-	s.l.Infof("log message")
+func (s *WriterLoggerSuite) TestInfo(c *C) {
+	s.l.Info("log message")
 	c.Assert(s.output(), Matches, ".*INFO.*log message.*\n")
 }
 
-func (s *WriterLoggerSuite) TestWarnf(c *C) {
-	s.l.Warnf("log message")
+func (s *WriterLoggerSuite) TestWarning(c *C) {
+	s.l.Warning("log message")
 	c.Assert(s.output(), Matches, ".*WARN.*log message.*\n")
 }
 
-func (s *WriterLoggerSuite) TestErrorf(c *C) {
-	s.l.Errorf("log message")
+func (s *WriterLoggerSuite) TestError(c *C) {
+	s.l.Error("log message")
 	c.Assert(s.output(), Matches, ".*ERROR.*log message.*\n")
-}
-
-func (s *WriterLoggerSuite) TestFatalf(c *C) {
-	s.l.Fatalf("log message")
-	c.Assert(strings.Split(s.output(), "\n")[0], Matches, ".*FATAL.*log message.*")
 }
 
 func (s *WriterLoggerSuite) TestSeverity(c *C) {
@@ -49,13 +43,13 @@ func (s *WriterLoggerSuite) TestSeverity(c *C) {
 	l := &writerLogger{SeverityError, s.w}
 
 	// it should not log anything below ERROR
-	l.Infof("log message")
+	l.Info("log message")
 	c.Assert(s.output(), Equals, "")
 
-	l.Warnf("log message")
+	l.Warning("log message")
 	c.Assert(s.output(), Equals, "")
 
-	l.Errorf("log message")
+	l.Error("log message")
 	c.Assert(s.output(), Matches, ".*ERROR.*log message.*\n")
 }
 

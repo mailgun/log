@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"strings"
 	"testing"
 
 	. "gopkg.in/check.v1"
@@ -51,44 +50,34 @@ func (s *LogSuite) TestNewLogger(c *C) {
 	c.Assert(l, IsNil)
 }
 
-func (s *LogSuite) TestInfof(c *C) {
+func (s *LogSuite) TestInfo(c *C) {
 	logger1 := newTestLogger("log1")
 	logger2 := newTestLogger("log2")
 	Init(logger1, logger2)
 
-	Infof("hello %s", "world")
+	Info("hello %s", "world")
 	c.Assert(logger1.b.String(), Equals, "INFO hello world\n")
 	c.Assert(logger2.b.String(), Equals, "INFO hello world\n")
 }
 
-func (s *LogSuite) TestWarnf(c *C) {
+func (s *LogSuite) TestWarn(c *C) {
 	logger1 := newTestLogger("log1")
 	logger2 := newTestLogger("log2")
 	Init(logger1, logger2)
 
-	Warnf("hello %s", "world")
+	Warning("hello %s", "world")
 	c.Assert(logger1.b.String(), Equals, "WARN hello world\n")
 	c.Assert(logger2.b.String(), Equals, "WARN hello world\n")
 }
 
-func (s *LogSuite) TestErrorf(c *C) {
+func (s *LogSuite) TestError(c *C) {
 	logger1 := newTestLogger("log1")
 	logger2 := newTestLogger("log2")
 	Init(logger1, logger2)
 
-	Errorf("hello %s", "world")
+	Error("hello %s", "world")
 	c.Assert(logger1.b.String(), Equals, "ERROR hello world\n")
 	c.Assert(logger2.b.String(), Equals, "ERROR hello world\n")
-}
-
-func (s *LogSuite) TestFatalf(c *C) {
-	logger1 := newTestLogger("log1")
-	logger2 := newTestLogger("log2")
-	Init(logger1, logger2)
-
-	Fatalf("hello %s", "world")
-	c.Assert(strings.Split(logger1.b.String(), "\n")[0], Equals, "FATAL hello world")
-	c.Assert(strings.Split(logger2.b.String(), "\n")[0], Equals, "FATAL hello world")
 }
 
 // testLogger helps in tests.
@@ -101,16 +90,13 @@ func newTestLogger(id string) *testLogger {
 	return &testLogger{id, &bytes.Buffer{}}
 }
 
-func (l *testLogger) Infof(format string, args ...interface{}) {
+func (l *testLogger) Info(format string, args ...interface{}) {
 }
 
-func (l *testLogger) Warnf(format string, args ...interface{}) {
+func (l *testLogger) Warning(format string, args ...interface{}) {
 }
 
-func (l *testLogger) Errorf(format string, args ...interface{}) {
-}
-
-func (l *testLogger) Fatalf(format string, args ...interface{}) {
+func (l *testLogger) Error(format string, args ...interface{}) {
 }
 
 func (l *testLogger) Writer(sev Severity) io.Writer {

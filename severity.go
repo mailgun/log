@@ -10,16 +10,14 @@ type Severity int32
 
 const (
 	SeverityInfo Severity = iota
-	SeverityWarn
+	SeverityWarning
 	SeverityError
-	SeverityFatal
 )
 
 var severityName = map[Severity]string{
-	SeverityInfo:  "INFO",
-	SeverityWarn:  "WARN",
-	SeverityError: "ERROR",
-	SeverityFatal: "FATAL",
+	SeverityInfo:    "INFO",
+	SeverityWarning: "WARN",
+	SeverityError:   "ERROR",
 }
 
 func (s *Severity) Get() Severity {
