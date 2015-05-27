@@ -23,18 +23,18 @@ func (s *WriterLoggerSuite) output() string {
 	return s.w.String()
 }
 
-func (s *WriterLoggerSuite) TestInfo(c *C) {
-	s.l.Info("log message")
+func (s *WriterLoggerSuite) TestInfof(c *C) {
+	s.l.Infof("log message")
 	c.Assert(s.output(), Matches, ".*INFO.*log message.*\n")
 }
 
-func (s *WriterLoggerSuite) TestWarning(c *C) {
-	s.l.Warning("log message")
+func (s *WriterLoggerSuite) TestWarningf(c *C) {
+	s.l.Warningf("log message")
 	c.Assert(s.output(), Matches, ".*WARN.*log message.*\n")
 }
 
-func (s *WriterLoggerSuite) TestError(c *C) {
-	s.l.Error("log message")
+func (s *WriterLoggerSuite) TestErrorf(c *C) {
+	s.l.Errorf("log message")
 	c.Assert(s.output(), Matches, ".*ERROR.*log message.*\n")
 }
 
@@ -43,13 +43,13 @@ func (s *WriterLoggerSuite) TestSeverity(c *C) {
 	l := &writerLogger{SeverityError, s.w}
 
 	// it should not log anything below ERROR
-	l.Info("log message")
+	l.Infof("log message")
 	c.Assert(s.output(), Equals, "")
 
-	l.Warning("log message")
+	l.Warningf("log message")
 	c.Assert(s.output(), Equals, "")
 
-	l.Error("log message")
+	l.Errorf("log message")
 	c.Assert(s.output(), Matches, ".*ERROR.*log message.*\n")
 }
 

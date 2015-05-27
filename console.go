@@ -14,15 +14,15 @@ type writerLogger struct {
 	w io.Writer
 }
 
-func (l *writerLogger) Info(format string, args ...interface{}) {
+func (l *writerLogger) Infof(format string, args ...interface{}) {
 	writeMessage(l, 1, SeverityInfo, format, args...)
 }
 
-func (l *writerLogger) Warning(format string, args ...interface{}) {
+func (l *writerLogger) Warningf(format string, args ...interface{}) {
 	writeMessage(l, 1, SeverityWarning, format, args...)
 }
 
-func (l *writerLogger) Error(format string, args ...interface{}) {
+func (l *writerLogger) Errorf(format string, args ...interface{}) {
 	writeMessage(l, 1, SeverityError, format, args...)
 }
 

@@ -50,32 +50,32 @@ func (s *LogSuite) TestNewLogger(c *C) {
 	c.Assert(l, IsNil)
 }
 
-func (s *LogSuite) TestInfo(c *C) {
+func (s *LogSuite) TestInfof(c *C) {
 	logger1 := newTestLogger("log1")
 	logger2 := newTestLogger("log2")
 	Init(logger1, logger2)
 
-	Info("hello %s", "world")
+	Infof("hello %s", "world")
 	c.Assert(logger1.b.String(), Equals, "INFO hello world\n")
 	c.Assert(logger2.b.String(), Equals, "INFO hello world\n")
 }
 
-func (s *LogSuite) TestWarn(c *C) {
+func (s *LogSuite) TestWarningf(c *C) {
 	logger1 := newTestLogger("log1")
 	logger2 := newTestLogger("log2")
 	Init(logger1, logger2)
 
-	Warning("hello %s", "world")
+	Warningf("hello %s", "world")
 	c.Assert(logger1.b.String(), Equals, "WARN hello world\n")
 	c.Assert(logger2.b.String(), Equals, "WARN hello world\n")
 }
 
-func (s *LogSuite) TestError(c *C) {
+func (s *LogSuite) TestErrorf(c *C) {
 	logger1 := newTestLogger("log1")
 	logger2 := newTestLogger("log2")
 	Init(logger1, logger2)
 
-	Error("hello %s", "world")
+	Errorf("hello %s", "world")
 	c.Assert(logger1.b.String(), Equals, "ERROR hello world\n")
 	c.Assert(logger2.b.String(), Equals, "ERROR hello world\n")
 }
@@ -90,13 +90,13 @@ func newTestLogger(id string) *testLogger {
 	return &testLogger{id, &bytes.Buffer{}}
 }
 
-func (l *testLogger) Info(format string, args ...interface{}) {
+func (l *testLogger) Infof(format string, args ...interface{}) {
 }
 
-func (l *testLogger) Warning(format string, args ...interface{}) {
+func (l *testLogger) Warningf(format string, args ...interface{}) {
 }
 
-func (l *testLogger) Error(format string, args ...interface{}) {
+func (l *testLogger) Errorf(format string, args ...interface{}) {
 }
 
 func (l *testLogger) Writer(sev Severity) io.Writer {

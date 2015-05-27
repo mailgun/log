@@ -41,15 +41,15 @@ func NewSysLogger(conf LogConfig) (Logger, error) {
 	return &sysLogger{sev, infoW, warnW, errorW}, nil
 }
 
-func (l *sysLogger) Info(format string, args ...interface{}) {
+func (l *sysLogger) Infof(format string, args ...interface{}) {
 	writeMessage(l, 1, SeverityInfo, format, args...)
 }
 
-func (l *sysLogger) Warning(format string, args ...interface{}) {
+func (l *sysLogger) Warningf(format string, args ...interface{}) {
 	writeMessage(l, 1, SeverityWarning, format, args...)
 }
 
-func (l *sysLogger) Error(format string, args ...interface{}) {
+func (l *sysLogger) Errorf(format string, args ...interface{}) {
 	writeMessage(l, 1, SeverityError, format, args...)
 }
 

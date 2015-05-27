@@ -23,22 +23,22 @@ func (s *SysLoggerSuite) SetUpTest(c *C) {
 	s.l = &sysLogger{SeverityInfo, s.infoB, s.warnB, s.errorB}
 }
 
-func (s *SysLoggerSuite) TestInfo(c *C) {
-	s.l.Info("info message")
+func (s *SysLoggerSuite) TestInfof(c *C) {
+	s.l.Infof("info message")
 	c.Assert(s.infoB.String(), Matches, ".*INFO.*info message.*")
 	c.Assert(s.warnB.String(), Equals, "")
 	c.Assert(s.errorB.String(), Equals, "")
 }
 
-func (s *SysLoggerSuite) TestWarning(c *C) {
-	s.l.Warning("warn message")
+func (s *SysLoggerSuite) TestWarningf(c *C) {
+	s.l.Warningf("warn message")
 	c.Assert(s.infoB.String(), Equals, "")
 	c.Assert(s.warnB.String(), Matches, ".*WARN.*warn message.*")
 	c.Assert(s.errorB.String(), Equals, "")
 }
 
-func (s *SysLoggerSuite) TestError(c *C) {
-	s.l.Error("error message")
+func (s *SysLoggerSuite) TestErrorf(c *C) {
+	s.l.Errorf("error message")
 	c.Assert(s.infoB.String(), Equals, "")
 	c.Assert(s.warnB.String(), Equals, "")
 	c.Assert(s.errorB.String(), Matches, ".*ERROR.*error message.*")
@@ -49,13 +49,13 @@ func (s *SysLoggerSuite) TestSeverity(c *C) {
 	l := &sysLogger{SeverityError, s.infoB, s.warnB, s.errorB}
 
 	// it should not log anything below ERROR
-	l.Info("info message")
+	l.Infof("info message")
 	c.Assert(s.infoB.String(), Equals, "")
 
-	l.Warning("warn message")
+	l.Warningf("warn message")
 	c.Assert(s.warnB.String(), Equals, "")
 
-	l.Error("error message")
+	l.Errorf("error message")
 	c.Assert(s.errorB.String(), Matches, ".*ERROR.*error message.*")
 }
 

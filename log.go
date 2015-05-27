@@ -11,9 +11,9 @@ var loggers []Logger
 // Logger is an interface that should be implemented by all loggers wishing to participate
 // in the logger chain initialized by this package.
 type Logger interface {
-	Info(string, ...interface{})
-	Warning(string, ...interface{})
-	Error(string, ...interface{})
+	Infof(string, ...interface{})
+	Warningf(string, ...interface{})
+	Errorf(string, ...interface{})
 
 	// Writer returns a logger's underlying io.Writer used to write log messages to.
 	//
@@ -75,22 +75,22 @@ func NewLogger(config LogConfig) (Logger, error) {
 	return nil, errors.New(fmt.Sprintf("unknown logger: %v", config))
 }
 
-// Info logs to the INFO log.
-func Info(format string, args ...interface{}) {
+// Infof logs to the INFO log.
+func Infof(format string, args ...interface{}) {
 	for _, logger := range loggers {
 		writeMessage(logger, 1, SeverityInfo, format, args...)
 	}
 }
 
-// Warning logs to the WARN and INFO logs.
-func Warning(format string, args ...interface{}) {
+// Warningf logs to the WARN and INFO logs.
+func Warningf(format string, args ...interface{}) {
 	for _, logger := range loggers {
 		writeMessage(logger, 1, SeverityWarning, format, args...)
 	}
 }
 
-// Error logs to the ERROR, WARN, and INFO logs.
-func Error(format string, args ...interface{}) {
+// Errorf logs to the ERROR, WARN, and INFO logs.
+func Errorf(format string, args ...interface{}) {
 	for _, logger := range loggers {
 		writeMessage(logger, 1, SeverityError, format, args...)
 	}
