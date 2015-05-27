@@ -9,6 +9,7 @@ import (
 
 const (
 	UnknownFile = "unknown_file"
+	UnknownPath = "unknown_path"
 	UnknownFunc = "unknown_func"
 )
 
@@ -18,22 +19,30 @@ var (
 	appname     = filepath.Base(os.Args[0])
 )
 
-// callerInfo returns information about a certain log function invoker
+type callerInfo struct {
+	fileName string
+	filePath string
+	funcName string
+	lineNo   int
+}
+
+// getCallerInfo returns information about a certain log function invoker
 // such as file name, function name and line number
-func callerInfo(depth int) (string, string, int) {
-	if pc, fileName, lineNo, ok := runtime.Caller(depth + 1); !ok {
-		return UnknownFile, UnknownFunc, 0
+func getCallerInfo(depth int) *callerInfo {
+	if pc, filePath, lineNo, ok := runtime.Caller(depth + 1); !ok {
+		return &callerInfo{UnknownFile, UnknownPath, UnknownFunc, 0}
 	} else {
-		slashPos := strings.LastIndex(file, "/")
+		var fileName string
+		slashPos := strings.LastIndex(filePath, "/")
 		if slashPos >= 0 {
-			fileName = fileName[slashPos+1:]
+			fileName = filePath[slashPos+1:]
 		}
-		return fileName, runtime.FuncForPC(pc).Name(), lineNo
+		return &callerInfo{fileName, filePath, runtime.FuncForPC(pc).Name(), lineNo}
 	}
 }
 
-// Return stack traces of all the running goroutines.
-func stackTraces() string {
+// getStackTraces returns stack traces of all running goroutines.
+func getStackTraces() string {
 	trace := make([]byte, 100000)
 	nbytes := runtime.Stack(trace, true)
 	return string(trace[:nbytes])

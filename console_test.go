@@ -2,76 +2,74 @@ package log
 
 import (
 	"bytes"
+	"os"
 	"strings"
 
 	. "gopkg.in/check.v1"
 )
 
-type ConsoleLogSuite struct {
-	out *bytes.Buffer
+type WriterLoggerSuite struct {
+	w *bytes.Buffer
+	l *writerLogger
 }
 
-var _ = Suite(&ConsoleLogSuite{})
+var _ = Suite(&WriterLoggerSuite{})
 
-func (s *ConsoleLogSuite) SetUpTest(c *C) {
-	SetSeverity(SeverityInfo)
-	s.out = &bytes.Buffer{}
-	logger.loggers = []Logger{&writerLogger{w: s.out}}
-	runtimeCaller = func(skip int) (pc uintptr, file string, line int, ok bool) {
-		return 0, "", 0, false
-	}
-	exit = func() {}
+func (s *WriterLoggerSuite) SetUpTest(c *C) {
+	s.w = &bytes.Buffer{}
+	s.l = &writerLogger{SeverityInfo, s.w}
 }
 
-func (s *ConsoleLogSuite) TearDownTest(c *C) {
-	logger.loggers = []Logger{}
-	SetSeverity(SeverityError)
+func (s *WriterLoggerSuite) output() string {
+	return s.w.String()
 }
 
-func (s *ConsoleLogSuite) output() string {
-	return s.out.String()
+func (s *WriterLoggerSuite) TestInfof(c *C) {
+	s.l.Infof("log message")
+	c.Assert(s.output(), Matches, ".*INFO.*log message.*\n")
 }
 
-func (s *ConsoleLogSuite) TestNewConsoleLogger(c *C) {
-	config := &LogConfig{Name: "testNew"}
-	logger, err := NewConsoleLogger(config)
-	c.Assert(logger, NotNil)
-	c.Assert(err, IsNil)
+func (s *WriterLoggerSuite) TestWarnf(c *C) {
+	s.l.Warnf("log message")
+	c.Assert(s.output(), Matches, ".*WARN.*log message.*\n")
 }
 
-func (s *ConsoleLogSuite) TestInfo(c *C) {
-	Infof("test message")
-	c.Assert(s.output(), Matches, ".*INFO.*test message.*\n")
+func (s *WriterLoggerSuite) TestErrorf(c *C) {
+	s.l.Errorf("log message")
+	c.Assert(s.output(), Matches, ".*ERROR.*log message.*\n")
 }
 
-func (s *ConsoleLogSuite) TestWarning(c *C) {
-	Warningf("test message")
-	c.Assert(s.output(), Matches, ".*WARN.*test message.*\n")
+func (s *WriterLoggerSuite) TestFatalf(c *C) {
+	s.l.Fatalf("log message")
+	c.Assert(strings.Split(s.output(), "\n")[0], Matches, ".*FATAL.*log message.*")
 }
 
-func (s *ConsoleLogSuite) TestError(c *C) {
-	Errorf("test message")
-	c.Assert(s.output(), Matches, ".*ERROR.*test message.*\n")
-}
+func (s *WriterLoggerSuite) TestSeverity(c *C) {
+	// create an error logger
+	l := &writerLogger{SeverityError, s.w}
 
-func (s *ConsoleLogSuite) TestFatal(c *C) {
-	Fatalf("test message")
-	c.Assert(strings.Split(s.output(), "\n")[0], Matches, ".*FATAL.*test message")
-}
-
-func (s *ConsoleLogSuite) TestUpperLevel(c *C) {
-	SetSeverity(SeverityError)
-	Infof("info message")
-	Errorf("error message")
-	c.Assert(s.output(), Matches, ".*ERROR.*error message.*\n")
-}
-
-func (s *ConsoleLogSuite) TestUpdateLevel(c *C) {
-	SetSeverity(SeverityError)
-	Infof("info message")
+	// it should not log anything below ERROR
+	l.Infof("log message")
 	c.Assert(s.output(), Equals, "")
 
-	SetSeverity(SeverityInfo)
-	Infof("info message")
-	c.Assert(s.output(), Matches, ".*INFO.*info message.*\n")
+	l.Warnf("log message")
+	c.Assert(s.output(), Equals, "")
+
+	l.Errorf("log message")
+	c.Assert(s.output(), Matches, ".*ERROR.*log message.*\n")
+}
+
+type ConsoleLoggerSuite struct {
+}
+
+var _ = Suite(&ConsoleLoggerSuite{})
+
+func (s *ConsoleLoggerSuite) TestNewConsoleLogger(c *C) {
+	l, err := NewConsoleLogger(LogConfig{ConsoleLoggerName, "info"})
+	c.Assert(err, IsNil)
+	c.Assert(l, NotNil)
+
+	console := l.(*consoleLogger)
+	c.Assert(console.sev, Equals, SeverityInfo)
+	c.Assert(console.w, Equals, os.Stdout)
 }

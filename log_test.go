@@ -1,89 +1,126 @@
 package log
 
 import (
-	"io/ioutil"
+	"bytes"
+	"fmt"
+	"io"
+	"strings"
 	"testing"
 
 	. "gopkg.in/check.v1"
 )
 
-func TestModel(t *testing.T) { TestingT(t) }
+func TestLog(t *testing.T) { TestingT(t) }
 
 type LogSuite struct{}
 
 var _ = Suite(&LogSuite{})
 
 func (s *LogSuite) SetUpTest(c *C) {
-	// mock exit function
-	runtimeCaller = func(skip int) (pc uintptr, file string, line int, ok bool) {
-		return 0, "", 0, false
-	}
-	exit = func() {}
-	SetSeverity(SeverityInfo)
+	// reset global loggers chain before every test
+	loggers = []Logger{}
 }
 
-func (s *LogSuite) TearDownTest(c *C) {
-	SetSeverity(SeverityInfo)
+func (s *LogSuite) TestInit(c *C) {
+	Init(newTestLogger("log1"), newTestLogger("log2"))
+	c.Assert(loggers[0].String(), Equals, "testLogger(log1)")
+	c.Assert(loggers[1].String(), Equals, "testLogger(log2)")
 }
 
-func (s *LogSuite) SetUpSuite(c *C) {
-	consoleConfig := &LogConfig{Name: "console"}
-	syslogConfig := &LogConfig{Name: "syslog"}
-	err := Init([]*LogConfig{consoleConfig, syslogConfig})
+func (s *LogSuite) TestInitWithConfig(c *C) {
+	InitWithConfig(LogConfig{ConsoleLoggerName, "info"}, LogConfig{SysLoggerName, "info"})
+	c.Assert(loggers[0].String(), Equals, "consoleLogger(INFO)")
+	c.Assert(loggers[1].String(), Equals, "sysLogger(INFO)")
+}
+
+func (s *LogSuite) TestNewLogger(c *C) {
+	l, err := NewLogger(LogConfig{ConsoleLoggerName, "info"})
 	c.Assert(err, IsNil)
-	for _, l := range logger.loggers {
-		if cl, ok := l.(*writerLogger); ok {
-			cl.w = ioutil.Discard
-		}
-	}
-}
+	c.Assert(l.String(), Equals, "consoleLogger(INFO)")
 
-func (s *LogSuite) TestInitError(c *C) {
-	unknownConfig := &LogConfig{Name: "unknown"}
-	err := Init([]*LogConfig{unknownConfig})
+	l, err = NewLogger(LogConfig{SysLoggerName, "warn"})
+	c.Assert(err, IsNil)
+	c.Assert(l.String(), Equals, "sysLogger(WARN)")
+
+	l, err = NewLogger(LogConfig{UDPLoggerName, "error"})
+	c.Assert(err, IsNil)
+	c.Assert(l.String(), Equals, "udpLogger(ERROR)")
+
+	l, err = NewLogger(LogConfig{"SuperDuperLogger", "info"})
 	c.Assert(err, NotNil)
-	c.Assert(logger.loggers, HasLen, 2)
+	c.Assert(l, IsNil)
 }
 
 func (s *LogSuite) TestInfof(c *C) {
-	Infof("test message, %v", "info")
+	logger1 := newTestLogger("log1")
+	logger2 := newTestLogger("log2")
+	Init(logger1, logger2)
+
+	Infof("hello %s", "world")
+	c.Assert(logger1.b.String(), Equals, "INFO hello world\n")
+	c.Assert(logger2.b.String(), Equals, "INFO hello world\n")
 }
 
-func (s *LogSuite) TestWarningf(c *C) {
-	Warningf("test message, %v", "warning")
+func (s *LogSuite) TestWarnf(c *C) {
+	logger1 := newTestLogger("log1")
+	logger2 := newTestLogger("log2")
+	Init(logger1, logger2)
+
+	Warnf("hello %s", "world")
+	c.Assert(logger1.b.String(), Equals, "WARN hello world\n")
+	c.Assert(logger2.b.String(), Equals, "WARN hello world\n")
 }
 
 func (s *LogSuite) TestErrorf(c *C) {
-	Errorf("test message, %v", "error")
+	logger1 := newTestLogger("log1")
+	logger2 := newTestLogger("log2")
+	Init(logger1, logger2)
+
+	Errorf("hello %s", "world")
+	c.Assert(logger1.b.String(), Equals, "ERROR hello world\n")
+	c.Assert(logger2.b.String(), Equals, "ERROR hello world\n")
 }
 
 func (s *LogSuite) TestFatalf(c *C) {
-	Fatalf("test message, %v", "fatal")
+	logger1 := newTestLogger("log1")
+	logger2 := newTestLogger("log2")
+	Init(logger1, logger2)
+
+	Fatalf("hello %s", "world")
+	c.Assert(strings.Split(logger1.b.String(), "\n")[0], Equals, "FATAL hello world")
+	c.Assert(strings.Split(logger2.b.String(), "\n")[0], Equals, "FATAL hello world")
 }
 
-func (s *LogSuite) TestCallerInfoError(c *C) {
-	file, line := callerInfo(3)
-	c.Assert(file, Equals, "unknown")
-	c.Assert(line, Equals, 0)
+// testLogger helps in tests.
+type testLogger struct {
+	id string
+	b  *bytes.Buffer
 }
 
-func (s *LogSuite) TestGetSetSeverity(c *C) {
-	for sev := range severityName {
-		SetSeverity(sev)
-		c.Assert(GetSeverity(), Equals, sev)
-	}
+func newTestLogger(id string) *testLogger {
+	return &testLogger{id, &bytes.Buffer{}}
 }
 
-func (s *LogSuite) TestSeverityFromString(c *C) {
-	for sev, name := range severityName {
-		out, err := SeverityFromString(name)
-		c.Assert(err, IsNil)
-		c.Assert(out, Equals, sev)
-	}
+func (l *testLogger) Infof(format string, args ...interface{}) {
 }
 
-func (s *LogSuite) TestSeverityToString(c *C) {
-	for sev, name := range severityName {
-		c.Assert(sev.String(), Equals, name)
-	}
+func (l *testLogger) Warnf(format string, args ...interface{}) {
+}
+
+func (l *testLogger) Errorf(format string, args ...interface{}) {
+}
+
+func (l *testLogger) Fatalf(format string, args ...interface{}) {
+}
+
+func (l *testLogger) Writer(sev Severity) io.Writer {
+	return l.b
+}
+
+func (l *testLogger) FormatMessage(sev Severity, caller *callerInfo, format string, args ...interface{}) string {
+	return fmt.Sprintf("%s %s\n", sev, fmt.Sprintf(format, args...))
+}
+
+func (l testLogger) String() string {
+	return fmt.Sprintf("testLogger(%s)", l.id)
 }

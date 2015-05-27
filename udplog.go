@@ -8,6 +8,8 @@ import (
 )
 
 const (
+	UDPLoggerName = "udplog"
+
 	DefaultHost = "127.0.0.1"
 	DefaultPort = 55647
 
@@ -15,23 +17,23 @@ const (
 )
 
 type udpLogRecord struct {
-	AppName   string   `json:"appname"`
-	HostName  string   `json:"hostname"`
-	LogLevel  Severity `json:"logLevel"`
-	FileName  string   `json:"filename"`
-	FuncName  string   `json:"funcName"`
-	LineNo    int      `json:"lineno"`
-	Message   []byte   `json:"message"`
-	Timestamp int64    `json:"timestamp"`
+	AppName   string `json:"appname"`
+	HostName  string `json:"hostname"`
+	LogLevel  string `json:"logLevel"`
+	FileName  string `json:"filename"`
+	FuncName  string `json:"funcName"`
+	LineNo    int    `json:"lineno"`
+	Message   string `json:"message"`
+	Timestamp int64  `json:"timestamp"`
 }
 
-// udpLoggers is a type of writerLogger that sends messages in a special format to a udplog server.
+// udpLogger is a type of writerLogger that sends messages in a special format to a udplog server.
 type udpLogger struct {
 	*writerLogger
 }
 
 func NewUDPLogger(conf LogConfig) (Logger, error) {
-	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%s", DefaultHost, DefaultPort))
+	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%v", DefaultHost, DefaultPort))
 	if err != nil {
 		return nil, err
 	}
@@ -41,12 +43,17 @@ func NewUDPLogger(conf LogConfig) (Logger, error) {
 		return nil, err
 	}
 
-	return &udpLogger{&writerLogger{conf.Severity, conn}}, nil
+	sev, err := SeverityFromString(conf.Severity)
+	if err != nil {
+		return nil, err
+	}
+
+	return &udpLogger{&writerLogger{sev, conn}}, nil
 }
 
-func (l *udpLogger) FormatMessage(sev Severity, fileName, funcName string, lineNo int, format string, args ...interface{}) string {
+func (l *udpLogger) FormatMessage(sev Severity, caller *callerInfo, format string, args ...interface{}) string {
 	rec := &udpLogRecord{
-		appname, hostname, sev, fileName, funcName, lineNo, fmt.Sprintf(format, args...), time.Now().UnixNano() / 1000000}
+		appname, hostname, sev.String(), caller.filePath, caller.funcName, caller.lineNo, fmt.Sprintf(format, args...), time.Now().UnixNano() / 1000000}
 
 	dump, err := json.Marshal(rec)
 	if err != nil {
@@ -54,4 +61,8 @@ func (l *udpLogger) FormatMessage(sev Severity, fileName, funcName string, lineN
 	}
 
 	return fmt.Sprintf("%s:%s", DefaultCategory, dump)
+}
+
+func (l *udpLogger) String() string {
+	return fmt.Sprintf("udpLogger(%s)", l.sev)
 }

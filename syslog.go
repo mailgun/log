@@ -6,35 +6,39 @@ import (
 	"log/syslog"
 )
 
-// Syslogger sends all your logs to syslog
-// Note: the logs are going to MAIL_LOG facility
+const SysLoggerName = "syslog"
+
+// sysLogger logs messages to rsyslog MAIL_LOG facility.
 type sysLogger struct {
 	sev Severity
 
-	infoW  *syslog.Writer
-	warnW  *syslog.Writer
-	errorW *syslog.Writer
+	infoW  io.Writer
+	warnW  io.Writer
+	errorW io.Writer
 }
 
-var newSyslogWriter = syslog.New // for mocking in tests
-
 func NewSysLogger(conf LogConfig) (Logger, error) {
-	infoW, err := newSyslogWriter(syslog.LOG_MAIL|syslog.LOG_INFO, appname)
+	infoW, err := syslog.New(syslog.LOG_MAIL|syslog.LOG_INFO, appname)
 	if err != nil {
 		return nil, err
 	}
 
-	warnW, err := newSyslogWriter(syslog.LOG_MAIL|syslog.LOG_WARNING, appname)
+	warnW, err := syslog.New(syslog.LOG_MAIL|syslog.LOG_WARNING, appname)
 	if err != nil {
 		return nil, err
 	}
 
-	errorW, err := newSyslogWriter(syslog.LOG_MAIL|syslog.LOG_ERR, appname)
+	errorW, err := syslog.New(syslog.LOG_MAIL|syslog.LOG_ERR, appname)
 	if err != nil {
 		return nil, err
 	}
 
-	return &sysLogger{conf.Severity, infoW, warnW, errorW}, nil
+	sev, err := SeverityFromString(conf.Severity)
+	if err != nil {
+		return nil, err
+	}
+
+	return &sysLogger{sev, infoW, warnW, errorW}, nil
 }
 
 func (l *sysLogger) Infof(format string, args ...interface{}) {
@@ -55,21 +59,24 @@ func (l *sysLogger) Fatalf(format string, args ...interface{}) {
 
 func (l *sysLogger) Writer(sev Severity) io.Writer {
 	// is this logger configured to log at the provided severity?
-	if l.sev.Gt(sev) {
-		return nil
+	if sev.Gte(l.sev) {
+		// return an appropriate writer
+		switch sev {
+		case SeverityInfo:
+			return l.infoW
+		case SeverityWarn:
+			return l.warnW
+		default:
+			return l.errorW
+		}
 	}
-
-	// return an appropriate writer
-	switch sev {
-	case SeverityInfo:
-		return l.info
-	case SeverityWarn:
-		return l.warn
-	default:
-		return l.err
-	}
+	return nil
 }
 
-func (l *sysLogger) FormatMessage(sev Severity, fileName, funcName string, lineNo int, format string, args ...interface{}) string {
-	return fmt.Sprintf("%s PID:%d [%s:%d:%s] %s", sev, pid, fileName, lineNo, funcName, fmt.Sprintf(format, args...))
+func (l *sysLogger) FormatMessage(sev Severity, caller *callerInfo, format string, args ...interface{}) string {
+	return fmt.Sprintf("%s PID:%d [%s:%d:%s] %s", sev, pid, caller.fileName, caller.lineNo, caller.funcName, fmt.Sprintf(format, args...))
+}
+
+func (l sysLogger) String() string {
+	return fmt.Sprintf("sysLogger(%s)", l.sev)
 }

@@ -22,16 +22,16 @@ var severityName = map[Severity]string{
 	SeverityFatal: "FATAL",
 }
 
-func (s Severity) Get() Severity {
+func (s *Severity) Get() Severity {
 	return Severity(atomic.LoadInt32((*int32)(s)))
 }
 
-func (s Severity) Set(val Severity) {
+func (s *Severity) Set(val Severity) {
 	atomic.StoreInt32((*int32)(s), int32(val))
 }
 
-func (s Severity) Gt(val Severity) bool {
-	return s.Get() > val
+func (s *Severity) Gte(val Severity) bool {
+	return s.Get() >= val
 }
 
 func (s Severity) String() string {
