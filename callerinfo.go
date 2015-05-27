@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 )
 
 var (
@@ -28,11 +27,6 @@ func getCallerInfo(depth int) *CallerInfo {
 	if pc, filePath, lineNo, ok := runtime.Caller(depth + 1); !ok {
 		return &CallerInfo{"unknown_file", "unknown_path", "unknown_func", 0}
 	} else {
-		var fileName string
-		slashPos := strings.LastIndex(filePath, "/")
-		if slashPos >= 0 {
-			fileName = filePath[slashPos+1:]
-		}
-		return &CallerInfo{fileName, filePath, runtime.FuncForPC(pc).Name(), lineNo}
+		return &CallerInfo{filepath.Base(filePath), filePath, runtime.FuncForPC(pc).Name(), lineNo}
 	}
 }
