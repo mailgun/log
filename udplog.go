@@ -17,14 +17,14 @@ const (
 )
 
 type udpLogRecord struct {
-	AppName   string `json:"appname"`
-	HostName  string `json:"hostname"`
-	LogLevel  string `json:"logLevel"`
-	FileName  string `json:"filename"`
-	FuncName  string `json:"funcName"`
-	LineNo    int    `json:"lineno"`
-	Message   string `json:"message"`
-	Timestamp int64  `json:"timestamp"`
+	AppName   string  `json:"appname"`
+	HostName  string  `json:"hostname"`
+	LogLevel  string  `json:"logLevel"`
+	FileName  string  `json:"filename"`
+	FuncName  string  `json:"funcName"`
+	LineNo    int     `json:"lineno"`
+	Message   string  `json:"message"`
+	Timestamp float64 `json:"timestamp"`
 }
 
 // udpLogger is a type of writerLogger that sends messages in a special format to a udplog server.
@@ -53,7 +53,7 @@ func NewUDPLogger(conf LogConfig) (Logger, error) {
 
 func (l *udpLogger) FormatMessage(sev Severity, caller *callerInfo, format string, args ...interface{}) string {
 	rec := &udpLogRecord{
-		appname, hostname, sev.String(), caller.filePath, caller.funcName, caller.lineNo, fmt.Sprintf(format, args...), time.Now().UnixNano() / 1000000}
+		appname, hostname, sev.String(), caller.filePath, caller.funcName, caller.lineNo, fmt.Sprintf(format, args...), float64(time.Now().UnixNano()) / 1000000000}
 
 	dump, err := json.Marshal(rec)
 	if err != nil {
