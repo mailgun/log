@@ -19,10 +19,10 @@ import "github.com/mailgun/log"
 
 func main() {
   // create a console logger
-  console, _ := log.NewLogger(LogConfig{"console", "info"})
+  console, _ := log.NewLogger(log.Config{"console", "info"})
 
   // create a syslogger
-  syslog, _ := log.NewLogger(LogConfig{"syslog", "error"})
+  syslog, _ := log.NewLogger(log.Config{"syslog", "error"})
 
   // init the logging package
   log.Init(console, syslog) // or any other logger implementing `log.Logger` can be provided
@@ -51,7 +51,7 @@ type Config struct {
   // some program-specific configuration
 
   // logging configuration
-  Logging []log.LogConfig
+  Logging []log.Config
 }
 ```
 
