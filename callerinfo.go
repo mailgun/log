@@ -7,10 +7,18 @@ import (
 )
 
 var (
-	pid         = os.Getpid()
-	hostname, _ = os.Hostname()
-	appname     = filepath.Base(os.Args[0])
+	pid      = os.Getpid()
+	hostname = "" // will be set in the init function
+	appname  = filepath.Base(os.Args[0])
 )
+
+func init() {
+	// determine the hostname but do not stop if it fails
+	var err error
+	if hostname, err = os.Hostname(); err != nil {
+		hostname = "unknown_host"
+	}
+}
 
 // CallerInfo encapsulates information about a piece of code that called a certain log function,
 // such as file name, line number, etc.
