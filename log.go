@@ -26,8 +26,6 @@ type Logger interface {
 	// FormatMessage constructs and returns a final message that will go a logger's
 	// output channel.
 	FormatMessage(Severity, *CallerInfo, string, ...interface{}) string
-
-	String() string
 }
 
 // Config represents a configuration of an individual logger.
@@ -38,10 +36,6 @@ type Config struct {
 
 	// Severity indicates the minimum severity a logger will be logging messages at.
 	Severity string
-}
-
-func (c Config) String() string {
-	return fmt.Sprintf("Config(Name=%v, Severity=%v)", c.Name, c.Severity)
 }
 
 // Init initializes the logging package with the provided loggers.

@@ -39,7 +39,3 @@ func (l *consoleLogger) FormatMessage(sev Severity, caller *CallerInfo, format s
 	return fmt.Sprintf("%v %s %s PID:%d [%s:%d:%s] %s\n",
 		time.Now().UTC().Format(time.StampMilli), appname, sev, pid, caller.FileName, caller.LineNo, caller.FuncName, fmt.Sprintf(format, args...))
 }
-
-func (l consoleLogger) String() string {
-	return fmt.Sprintf("consoleLogger(%s)", l.sev)
-}

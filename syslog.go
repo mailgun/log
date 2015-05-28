@@ -58,7 +58,3 @@ func (l *sysLogger) Writer(sev Severity) io.Writer {
 func (l *sysLogger) FormatMessage(sev Severity, caller *CallerInfo, format string, args ...interface{}) string {
 	return fmt.Sprintf("%s PID:%d [%s:%d:%s] %s", sev, pid, caller.FileName, caller.LineNo, caller.FuncName, fmt.Sprintf(format, args...))
 }
-
-func (l sysLogger) String() string {
-	return fmt.Sprintf("sysLogger(%s)", l.sev)
-}

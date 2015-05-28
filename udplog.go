@@ -68,7 +68,3 @@ func (l *udpLogger) FormatMessage(sev Severity, caller *CallerInfo, format strin
 
 	return fmt.Sprintf("%s:%s", DefaultCategory, dump)
 }
-
-func (l *udpLogger) String() string {
-	return fmt.Sprintf("udpLogger(%s)", l.sev)
-}
