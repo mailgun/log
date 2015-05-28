@@ -3,48 +3,28 @@ package log
 import (
 	"fmt"
 	"strings"
-	"sync/atomic"
 )
 
 type Severity int32
 
+// Supported severities.
 const (
 	SeverityInfo Severity = iota
 	SeverityWarning
 	SeverityError
 )
 
-var severityName = map[Severity]string{
-	SeverityInfo:    "INFO",
-	SeverityWarning: "WARN",
-	SeverityError:   "ERROR",
-}
-
-func (s *Severity) Get() Severity {
-	return Severity(atomic.LoadInt32((*int32)(s)))
-}
-
-func (s *Severity) Set(val Severity) {
-	atomic.StoreInt32((*int32)(s), int32(val))
-}
-
-func (s *Severity) Gte(val Severity) bool {
-	return s.Get() >= val
-}
+var severityNames = []string{"INFO", "WARN", "ERROR"}
 
 func (s Severity) String() string {
-	n, ok := severityName[s]
-	if !ok {
-		return "UNKNOWN SEVERITY"
-	}
-	return n
+	return severityNames[s]
 }
 
-func SeverityFromString(s string) (Severity, error) {
+func severityFromString(s string) (Severity, error) {
 	s = strings.ToUpper(s)
-	for k, val := range severityName {
-		if val == s {
-			return k, nil
+	for idx, name := range severityNames {
+		if name == s {
+			return Severity(idx), nil
 		}
 	}
 	return -1, fmt.Errorf("unsupported severity: %s", s)

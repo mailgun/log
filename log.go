@@ -1,20 +1,22 @@
 package log
 
 import (
-	"errors"
 	"fmt"
 	"io"
 )
 
 var loggers []Logger
 
+// Supported log types.
+const (
+	Console = "console"
+	Syslog  = "syslog"
+	UDPLog  = "udplog"
+)
+
 // Logger is an interface that should be implemented by all loggers wishing to participate
 // in the logger chain initialized by this package.
 type Logger interface {
-	Infof(string, ...interface{})
-	Warningf(string, ...interface{})
-	Errorf(string, ...interface{})
-
 	// Writer returns a logger's underlying io.Writer used to write log messages to.
 	//
 	// It may be, for example, the standard output for a console logger or a socket
@@ -65,14 +67,14 @@ func InitWithConfig(configs ...Config) error {
 // NewLogger makes a proper logger from the given configuration.
 func NewLogger(config Config) (Logger, error) {
 	switch config.Name {
-	case ConsoleLoggerName:
+	case Console:
 		return NewConsoleLogger(config)
-	case SysLoggerName:
+	case Syslog:
 		return NewSysLogger(config)
-	case UDPLoggerName:
+	case UDPLog:
 		return NewUDPLogger(config)
 	}
-	return nil, errors.New(fmt.Sprintf("unknown logger: %v", config))
+	return nil, fmt.Errorf("unknown logger: %v", config)
 }
 
 // Infof logs to the INFO log.

@@ -27,21 +27,21 @@ func (s *LogSuite) TestInit(c *C) {
 }
 
 func (s *LogSuite) TestInitWithConfig(c *C) {
-	InitWithConfig(Config{ConsoleLoggerName, "info"}, Config{SysLoggerName, "info"})
+	InitWithConfig(Config{Console, "info"}, Config{Syslog, "info"})
 	c.Assert(loggers[0].String(), Equals, "consoleLogger(INFO)")
 	c.Assert(loggers[1].String(), Equals, "sysLogger(INFO)")
 }
 
 func (s *LogSuite) TestNewLogger(c *C) {
-	l, err := NewLogger(Config{ConsoleLoggerName, "info"})
+	l, err := NewLogger(Config{Console, "info"})
 	c.Assert(err, IsNil)
 	c.Assert(l.String(), Equals, "consoleLogger(INFO)")
 
-	l, err = NewLogger(Config{SysLoggerName, "warn"})
+	l, err = NewLogger(Config{Syslog, "warn"})
 	c.Assert(err, IsNil)
 	c.Assert(l.String(), Equals, "sysLogger(WARN)")
 
-	l, err = NewLogger(Config{UDPLoggerName, "error"})
+	l, err = NewLogger(Config{UDPLog, "error"})
 	c.Assert(err, IsNil)
 	c.Assert(l.String(), Equals, "udpLogger(ERROR)")
 
@@ -88,15 +88,6 @@ type testLogger struct {
 
 func newTestLogger(id string) *testLogger {
 	return &testLogger{id, &bytes.Buffer{}}
-}
-
-func (l *testLogger) Infof(format string, args ...interface{}) {
-}
-
-func (l *testLogger) Warningf(format string, args ...interface{}) {
-}
-
-func (l *testLogger) Errorf(format string, args ...interface{}) {
 }
 
 func (l *testLogger) Writer(sev Severity) io.Writer {

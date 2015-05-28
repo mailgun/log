@@ -6,8 +6,6 @@ import (
 	"log/syslog"
 )
 
-const SysLoggerName = "syslog"
-
 // sysLogger logs messages to rsyslog MAIL_LOG facility.
 type sysLogger struct {
 	sev Severity
@@ -33,7 +31,7 @@ func NewSysLogger(conf Config) (Logger, error) {
 		return nil, err
 	}
 
-	sev, err := SeverityFromString(conf.Severity)
+	sev, err := severityFromString(conf.Severity)
 	if err != nil {
 		return nil, err
 	}
@@ -41,21 +39,9 @@ func NewSysLogger(conf Config) (Logger, error) {
 	return &sysLogger{sev, infoW, warnW, errorW}, nil
 }
 
-func (l *sysLogger) Infof(format string, args ...interface{}) {
-	writeMessage(l, 1, SeverityInfo, format, args...)
-}
-
-func (l *sysLogger) Warningf(format string, args ...interface{}) {
-	writeMessage(l, 1, SeverityWarning, format, args...)
-}
-
-func (l *sysLogger) Errorf(format string, args ...interface{}) {
-	writeMessage(l, 1, SeverityError, format, args...)
-}
-
 func (l *sysLogger) Writer(sev Severity) io.Writer {
 	// is this logger configured to log at the provided severity?
-	if sev.Gte(l.sev) {
+	if sev >= l.sev {
 		// return an appropriate writer
 		switch sev {
 		case SeverityInfo:

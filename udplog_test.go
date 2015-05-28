@@ -12,7 +12,7 @@ type UDPLoggerSuite struct {
 var _ = Suite(&UDPLoggerSuite{})
 
 func (s *UDPLoggerSuite) TestNewUDPLogger(c *C) {
-	l, err := NewUDPLogger(Config{UDPLoggerName, "info"})
+	l, err := NewUDPLogger(Config{UDPLog, "info"})
 	c.Assert(err, IsNil)
 	c.Assert(l, NotNil)
 
@@ -22,7 +22,7 @@ func (s *UDPLoggerSuite) TestNewUDPLogger(c *C) {
 }
 
 func (s *UDPLoggerSuite) TestFormatMessage(c *C) {
-	l, _ := NewUDPLogger(Config{UDPLoggerName, "info"})
+	l, _ := NewUDPLogger(Config{UDPLog, "info"})
 
 	udplog := l.(*udpLogger)
 

@@ -8,8 +8,6 @@ import (
 )
 
 const (
-	UDPLoggerName = "udplog"
-
 	DefaultHost = "127.0.0.1"
 	DefaultPort = 55647
 
@@ -43,7 +41,7 @@ func NewUDPLogger(conf Config) (Logger, error) {
 		return nil, err
 	}
 
-	sev, err := SeverityFromString(conf.Severity)
+	sev, err := severityFromString(conf.Severity)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +51,15 @@ func NewUDPLogger(conf Config) (Logger, error) {
 
 func (l *udpLogger) FormatMessage(sev Severity, caller *CallerInfo, format string, args ...interface{}) string {
 	rec := &udpLogRecord{
-		appname, hostname, sev.String(), caller.FilePath, caller.FuncName, caller.LineNo, fmt.Sprintf(format, args...), float64(time.Now().UnixNano()) / 1000000000}
+		AppName:   appname,
+		HostName:  hostname,
+		LogLevel:  sev.String(),
+		FileName:  caller.FilePath,
+		FuncName:  caller.FuncName,
+		LineNo:    caller.LineNo,
+		Message:   fmt.Sprintf(format, args...),
+		Timestamp: float64(time.Now().UnixNano()) / 1000000000,
+	}
 
 	dump, err := json.Marshal(rec)
 	if err != nil {
