@@ -1,73 +1,60 @@
 package log
 
 import (
+	"fmt"
 	"io"
 	"log/syslog"
-	"os"
-	"path/filepath"
 )
 
-// Syslogger sends all your logs to syslog
-// Note: the logs are going to MAIL_LOG facility
+// sysLogger logs messages to rsyslog MAIL_LOG facility.
 type sysLogger struct {
-	info *syslog.Writer
-	warn *syslog.Writer
-	err  *syslog.Writer
+	sev Severity
+
+	infoW  io.Writer
+	warnW  io.Writer
+	errorW io.Writer
 }
 
-var newSyslogWriter = syslog.New // for mocking in tests
-
-func NewSysLogger(config *LogConfig) (Logger, error) {
-	info, err := newSyslogWriter(syslog.LOG_MAIL|syslog.LOG_INFO, getAppName())
+func NewSysLogger(conf Config) (Logger, error) {
+	infoW, err := syslog.New(syslog.LOG_MAIL|syslog.LOG_INFO, appname)
 	if err != nil {
 		return nil, err
 	}
 
-	warn, err := newSyslogWriter(syslog.LOG_MAIL|syslog.LOG_WARNING, getAppName())
+	warnW, err := syslog.New(syslog.LOG_MAIL|syslog.LOG_WARNING, appname)
 	if err != nil {
 		return nil, err
 	}
 
-	error, err := newSyslogWriter(syslog.LOG_MAIL|syslog.LOG_ERR, getAppName())
+	errorW, err := syslog.New(syslog.LOG_MAIL|syslog.LOG_ERR, appname)
 	if err != nil {
 		return nil, err
 	}
 
-	return &sysLogger{
-		info: info,
-		warn: warn,
-		err:  error,
-	}, nil
-}
+	sev, err := severityFromString(conf.Severity)
+	if err != nil {
+		return nil, err
+	}
 
-// Get process name
-func getAppName() string {
-	return filepath.Base(os.Args[0])
+	return &sysLogger{sev, infoW, warnW, errorW}, nil
 }
 
 func (l *sysLogger) Writer(sev Severity) io.Writer {
-	switch sev {
-	case SeverityInfo:
-		return l.info
-	case SeverityWarn:
-		return l.warn
-	default:
-		return l.err
+	// is this logger configured to log at the provided severity?
+	if sev >= l.sev {
+		// return an appropriate writer
+		switch sev {
+		case SeverityInfo:
+			return l.infoW
+		case SeverityWarning:
+			return l.warnW
+		default:
+			return l.errorW
+		}
 	}
+	return nil
 }
 
-func (l *sysLogger) Infof(format string, args ...interface{}) {
-	infof(1, l.Writer(SeverityInfo), format, args...)
-}
-
-func (l *sysLogger) Warningf(format string, args ...interface{}) {
-	warningf(1, l.Writer(SeverityWarn), format, args...)
-}
-
-func (l *sysLogger) Errorf(format string, args ...interface{}) {
-	errorf(1, l.Writer(SeverityError), format, args...)
-}
-
-func (l *sysLogger) Fatalf(format string, args ...interface{}) {
-	fatalf(1, l.Writer(SeverityFatal), format, args...)
+func (l *sysLogger) FormatMessage(sev Severity, caller *CallerInfo, format string, args ...interface{}) string {
+	return fmt.Sprintf("%s PID:%d [%s:%d:%s] %s", sev, pid, caller.FileName, caller.LineNo, caller.FuncName, fmt.Sprintf(format, args...))
 }
