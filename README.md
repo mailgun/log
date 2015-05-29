@@ -40,6 +40,7 @@ logging:
   - name:     console
     severity: error
   - name:     syslog
+    severity: info
 ```
 
 Logging config can be built into your program's config struct:
