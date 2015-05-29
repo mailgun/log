@@ -17,7 +17,7 @@ const (
 // Logger is an interface that should be implemented by all loggers wishing to participate
 // in the logger chain initialized by this package.
 type Logger interface {
-	// Writer returns a logger's underlying io.Writer used to write log messages to.
+	// Writer returns logger's underlying io.Writer used to write log messages to.
 	//
 	// It may be, for example, the standard output for a console logger or a socket
 	// connection for a UDP logger.
@@ -25,7 +25,7 @@ type Logger interface {
 	// Should return `nil` if the logger is not supposed to log at the specified severity.
 	Writer(Severity) io.Writer
 
-	// FormatMessage constructs and returns a final message that will go a logger's
+	// FormatMessage constructs and returns a final message that will go to the logger's
 	// output channel.
 	FormatMessage(Severity, *CallerInfo, string, ...interface{}) string
 }
