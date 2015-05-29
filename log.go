@@ -21,6 +21,8 @@ type Logger interface {
 	//
 	// It may be, for example, the standard output for a console logger or a socket
 	// connection for a UDP logger.
+	//
+	// Should return `nil` if the logger is not supposed to log at the specified severity.
 	Writer(Severity) io.Writer
 
 	// FormatMessage constructs and returns a final message that will go a logger's
