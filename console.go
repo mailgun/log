@@ -24,7 +24,7 @@ func (l *writerLogger) Writer(sev Severity) io.Writer {
 
 // consoleLogger is a type of writerLogger that sends messages to the standard output.
 type consoleLogger struct {
-	*writerLogger
+	*writerLogger // provides Writer() through embedding
 }
 
 func NewConsoleLogger(conf Config) (Logger, error) {

@@ -27,7 +27,7 @@ type udpLogRecord struct {
 
 // udpLogger is a type of writerLogger that sends messages in a special format to a udplog server.
 type udpLogger struct {
-	*writerLogger
+	*writerLogger // provides Writer() through embedding
 }
 
 func NewUDPLogger(conf Config) (Logger, error) {
