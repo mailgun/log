@@ -10,12 +10,18 @@ import (
 type sysLogger struct {
 	sev Severity
 
+	debugW io.Writer
 	infoW  io.Writer
 	warnW  io.Writer
 	errorW io.Writer
 }
 
 func NewSysLogger(conf Config) (Logger, error) {
+	debugW, err := syslog.New(syslog.LOG_MAIL|syslog.LOG_DEBUG, appname)
+	if err != nil {
+		return nil, err
+	}
+
 	infoW, err := syslog.New(syslog.LOG_MAIL|syslog.LOG_INFO, appname)
 	if err != nil {
 		return nil, err
@@ -36,7 +42,7 @@ func NewSysLogger(conf Config) (Logger, error) {
 		return nil, err
 	}
 
-	return &sysLogger{sev, infoW, warnW, errorW}, nil
+	return &sysLogger{sev, debugW, infoW, warnW, errorW}, nil
 }
 
 func (l *sysLogger) Writer(sev Severity) io.Writer {
@@ -44,6 +50,8 @@ func (l *sysLogger) Writer(sev Severity) io.Writer {
 	if sev >= l.sev {
 		// return an appropriate writer
 		switch sev {
+		case SeverityDebug:
+			return l.debugW
 		case SeverityInfo:
 			return l.infoW
 		case SeverityWarning:
