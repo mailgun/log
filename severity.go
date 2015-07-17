@@ -9,12 +9,13 @@ type Severity int32
 
 // Supported severities.
 const (
-	SeverityInfo Severity = iota
+	SeverityDebug Severity = iota
+	SeverityInfo
 	SeverityWarning
 	SeverityError
 )
 
-var severityNames = []string{"INFO", "WARN", "ERROR"}
+var severityNames = []string{"DEBUG", "INFO", "WARN", "ERROR"}
 
 func (s Severity) String() string {
 	return severityNames[s]

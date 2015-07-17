@@ -73,6 +73,13 @@ func NewLogger(config Config) (Logger, error) {
 	return nil, fmt.Errorf("unknown logger: %v", config)
 }
 
+// Debugf logs to the DEBUG log.
+func Debugf(format string, args ...interface{}) {
+	for _, logger := range loggers {
+		writeMessage(logger, 1, SeverityDebug, format, args...)
+	}
+}
+
 // Infof logs to the INFO log.
 func Infof(format string, args ...interface{}) {
 	for _, logger := range loggers {

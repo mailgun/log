@@ -53,6 +53,16 @@ func (s *LogSuite) TestNewLogger(c *C) {
 	c.Assert(l, IsNil)
 }
 
+func (s *LogSuite) TestDebugf(c *C) {
+	logger1 := newTestLogger("log1")
+	logger2 := newTestLogger("log2")
+	Init(logger1, logger2)
+
+	Debugf("hello %s", "world")
+	c.Assert(logger1.b.String(), Equals, "DEBUG hello world\n")
+	c.Assert(logger2.b.String(), Equals, "DEBUG hello world\n")
+}
+
 func (s *LogSuite) TestInfof(c *C) {
 	logger1 := newTestLogger("log1")
 	logger2 := newTestLogger("log2")
