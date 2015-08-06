@@ -41,7 +41,7 @@ func NewUDPLogger(conf Config) (Logger, error) {
 		return nil, err
 	}
 
-	sev, err := severityFromString(conf.Severity)
+	sev, err := SeverityFromString(conf.Severity)
 	if err != nil {
 		return nil, err
 	}
@@ -51,6 +51,10 @@ func NewUDPLogger(conf Config) (Logger, error) {
 
 func (l *udpLogger) SetSeverity(sev Severity) {
 	l.sev = sev
+}
+
+func (l *udpLogger) GetSeverity() Severity {
+	return l.sev
 }
 
 func (l *udpLogger) FormatMessage(sev Severity, caller *CallerInfo, format string, args ...interface{}) string {

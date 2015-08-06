@@ -5,7 +5,11 @@ import (
 	"io"
 )
 
-var loggers []Logger
+type grouplogger struct {
+	loggers []Logger
+}
+
+var gl grouplogger
 
 // Supported log types.
 const (
@@ -31,6 +35,9 @@ type Logger interface {
 
 	// Sets a loggers current Severity level.
 	SetSeverity(Severity)
+
+	// Gets the current Severity level.
+	GetSeverity() Severity
 }
 
 // Config represents a configuration of an individual logger.
@@ -46,7 +53,7 @@ type Config struct {
 // Init initializes the logging package with the provided loggers.
 func Init(l ...Logger) {
 	for _, logger := range l {
-		loggers = append(loggers, logger)
+		gl.loggers = append(gl.loggers, logger)
 	}
 }
 
@@ -58,7 +65,7 @@ func InitWithConfig(configs ...Config) error {
 		if err != nil {
 			return err
 		}
-		loggers = append(loggers, l)
+		gl.loggers = append(gl.loggers, l)
 	}
 	return nil
 }
@@ -77,35 +84,55 @@ func NewLogger(config Config) (Logger, error) {
 }
 
 func SetSeverity(sev Severity) {
-	for _, logger := range loggers {
+	gl.SetSeverity(sev)
+}
+
+func (gl *grouplogger) SetSeverity(sev Severity) {
+	for _, logger := range gl.loggers {
 		logger.SetSeverity(sev)
 	}
 }
 
 // Debugf logs to the DEBUG log.
 func Debugf(format string, args ...interface{}) {
-	for _, logger := range loggers {
+	gl.Debugf(format, args...)
+}
+
+func (gl *grouplogger) Debugf(format string, args ...interface{}) {
+	for _, logger := range gl.loggers {
 		writeMessage(logger, 1, SeverityDebug, format, args...)
 	}
 }
 
 // Infof logs to the INFO log.
 func Infof(format string, args ...interface{}) {
-	for _, logger := range loggers {
+	gl.Infof(format, args...)
+}
+
+func (gl *grouplogger) Infof(format string, args ...interface{}) {
+	for _, logger := range gl.loggers {
 		writeMessage(logger, 1, SeverityInfo, format, args...)
 	}
 }
 
 // Warningf logs to the WARN and INFO logs.
 func Warningf(format string, args ...interface{}) {
-	for _, logger := range loggers {
+	gl.Warningf(format, args...)
+}
+
+func (gl *grouplogger) Warningf(format string, args ...interface{}) {
+	for _, logger := range gl.loggers {
 		writeMessage(logger, 1, SeverityWarning, format, args...)
 	}
 }
 
 // Errorf logs to the ERROR, WARN, and INFO logs.
 func Errorf(format string, args ...interface{}) {
-	for _, logger := range loggers {
+	gl.Errorf(format, args...)
+}
+
+func (gl *grouplogger) Errorf(format string, args ...interface{}) {
+	for _, logger := range gl.loggers {
 		writeMessage(logger, 1, SeverityError, format, args...)
 	}
 }
@@ -116,4 +143,14 @@ func writeMessage(logger Logger, callDepth int, sev Severity, format string, arg
 		message := logger.FormatMessage(sev, caller, format, args...)
 		io.WriteString(w, message)
 	}
+}
+
+type LogWriter interface {
+	Infof(format string, args ...interface{})
+	Warningf(format string, args ...interface{})
+	Errorf(format string, args ...interface{})
+}
+
+func GetGlobalLogger() LogWriter {
+	return &gl
 }

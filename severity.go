@@ -21,7 +21,7 @@ func (s Severity) String() string {
 	return severityNames[s]
 }
 
-func severityFromString(s string) (Severity, error) {
+func SeverityFromString(s string) (Severity, error) {
 	s = strings.ToUpper(s)
 	for idx, name := range severityNames {
 		if name == s {

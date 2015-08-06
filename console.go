@@ -26,13 +26,17 @@ func (l *writerLogger) SetSeverity(sev Severity) {
 	l.sev = sev
 }
 
+func (l *writerLogger) GetSeverity() Severity {
+	return l.sev
+}
+
 // consoleLogger is a type of writerLogger that sends messages to the standard output.
 type consoleLogger struct {
 	*writerLogger // provides Writer() through embedding
 }
 
 func NewConsoleLogger(conf Config) (Logger, error) {
-	sev, err := severityFromString(conf.Severity)
+	sev, err := SeverityFromString(conf.Severity)
 	if err != nil {
 		return nil, err
 	}

@@ -37,7 +37,7 @@ func NewSysLogger(conf Config) (Logger, error) {
 		return nil, err
 	}
 
-	sev, err := severityFromString(conf.Severity)
+	sev, err := SeverityFromString(conf.Severity)
 	if err != nil {
 		return nil, err
 	}
@@ -47,6 +47,10 @@ func NewSysLogger(conf Config) (Logger, error) {
 
 func (l *sysLogger) SetSeverity(sev Severity) {
 	l.sev = sev
+}
+
+func (l *sysLogger) GetSeverity() Severity {
+	return l.sev
 }
 
 func (l *sysLogger) Writer(sev Severity) io.Writer {

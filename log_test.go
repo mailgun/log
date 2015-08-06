@@ -18,21 +18,21 @@ var _ = Suite(&LogSuite{})
 
 func (s *LogSuite) SetUpTest(c *C) {
 	// reset global loggers chain before every test
-	loggers = []Logger{}
+	gl.loggers = []Logger{}
 }
 
 func (s *LogSuite) TestInit(c *C) {
 	Init(newTestLogger("log1"), newTestLogger("log2"))
-	c.Assert(len(loggers), Equals, 2)
-	c.Assert(typeOf(loggers[0]), Equals, "*log.testLogger")
-	c.Assert(typeOf(loggers[1]), Equals, "*log.testLogger")
+	c.Assert(len(gl.loggers), Equals, 2)
+	c.Assert(typeOf(gl.loggers[0]), Equals, "*log.testLogger")
+	c.Assert(typeOf(gl.loggers[1]), Equals, "*log.testLogger")
 }
 
 func (s *LogSuite) TestInitWithConfig(c *C) {
 	InitWithConfig(Config{Console, "info"}, Config{Syslog, "info"})
-	c.Assert(len(loggers), Equals, 2)
-	c.Assert(typeOf(loggers[0]), Equals, "*log.consoleLogger")
-	c.Assert(typeOf(loggers[1]), Equals, "*log.sysLogger")
+	c.Assert(len(gl.loggers), Equals, 2)
+	c.Assert(typeOf(gl.loggers[0]), Equals, "*log.consoleLogger")
+	c.Assert(typeOf(gl.loggers[1]), Equals, "*log.sysLogger")
 }
 
 func (s *LogSuite) TestNewLogger(c *C) {
@@ -99,16 +99,25 @@ func typeOf(o interface{}) string {
 
 // testLogger helps in tests.
 type testLogger struct {
-	id string
-	b  *bytes.Buffer
+	id  string
+	b   *bytes.Buffer
+	sev Severity
 }
 
 func newTestLogger(id string) *testLogger {
-	return &testLogger{id, &bytes.Buffer{}}
+	return &testLogger{id, &bytes.Buffer{}, SeverityDebug}
 }
 
 func (l *testLogger) Writer(sev Severity) io.Writer {
 	return l.b
+}
+
+func (l *testLogger) SetSeverity(sev Severity) {
+	l.sev = sev
+}
+
+func (l *testLogger) GetSeverity() Severity {
+	return l.sev
 }
 
 func (l *testLogger) FormatMessage(sev Severity, caller *CallerInfo, format string, args ...interface{}) string {
