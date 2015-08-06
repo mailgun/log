@@ -22,6 +22,10 @@ func (l *writerLogger) Writer(sev Severity) io.Writer {
 	return nil
 }
 
+func (l *writerLogger) SetSeverity(sev Severity) {
+	l.sev = sev
+}
+
 // consoleLogger is a type of writerLogger that sends messages to the standard output.
 type consoleLogger struct {
 	*writerLogger // provides Writer() through embedding

@@ -45,6 +45,10 @@ func NewSysLogger(conf Config) (Logger, error) {
 	return &sysLogger{sev, debugW, infoW, warnW, errorW}, nil
 }
 
+func (l *sysLogger) SetSeverity(sev Severity) {
+	l.sev = sev
+}
+
 func (l *sysLogger) Writer(sev Severity) io.Writer {
 	// is this logger configured to log at the provided severity?
 	if sev >= l.sev {

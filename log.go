@@ -28,6 +28,9 @@ type Logger interface {
 	// FormatMessage constructs and returns a final message that will go to the logger's
 	// output channel.
 	FormatMessage(Severity, *CallerInfo, string, ...interface{}) string
+
+	// Sets a loggers current Severity level.
+	SetSeverity(Severity)
 }
 
 // Config represents a configuration of an individual logger.
@@ -71,6 +74,12 @@ func NewLogger(config Config) (Logger, error) {
 		return NewUDPLogger(config)
 	}
 	return nil, fmt.Errorf("unknown logger: %v", config)
+}
+
+func SetSeverity(sev Severity) {
+	for _, logger := range loggers {
+		logger.SetSeverity(sev)
+	}
 }
 
 // Debugf logs to the DEBUG log.

@@ -49,6 +49,10 @@ func NewUDPLogger(conf Config) (Logger, error) {
 	return &udpLogger{&writerLogger{sev, conn}}, nil
 }
 
+func (l *udpLogger) SetSeverity(sev Severity) {
+	l.sev = sev
+}
+
 func (l *udpLogger) FormatMessage(sev Severity, caller *CallerInfo, format string, args ...interface{}) string {
 	rec := &udpLogRecord{
 		AppName:   appname,
