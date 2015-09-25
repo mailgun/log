@@ -123,3 +123,51 @@ func (l *testLogger) GetSeverity() Severity {
 func (l *testLogger) FormatMessage(sev Severity, caller *CallerInfo, format string, args ...interface{}) string {
 	return fmt.Sprintf("%s %s\n", sev, fmt.Sprintf(format, args...))
 }
+
+func (s *LogSuite) TestCallerInfo(c *C) {
+	for severity, logFunc := range map[Severity]func(format string, args ...interface{}){
+		SeverityError:   Errorf,
+		SeverityWarning: Warningf,
+		SeverityInfo:    Infof,
+		SeverityDebug:   Debugf,
+	} {
+		// Given
+		var l callerLogger
+		Init(&l)
+		// When
+		logFunc("blah")
+		// Then
+		c.Assert(l.b.String(), Equals, fmt.Sprintf(
+			"%s log_test.go[138] github.com/mailgun/log.(*LogSuite).TestCallerInfo", severity))
+	}
+}
+
+func (s *LogSuite) TestCallerInfoLogf(c *C) {
+	// Given
+	var l callerLogger
+	Init(&l)
+	// When
+	Logf(0, SeverityInfo, "blah")
+	// Then
+	c.Assert(l.b.String(), Equals, "INFO log_test.go[150] github.com/mailgun/log.(*LogSuite).TestCallerInfoLogf")
+}
+
+type callerLogger struct {
+	b bytes.Buffer
+}
+
+func (l *callerLogger) Writer(sev Severity) io.Writer {
+	return &l.b
+}
+
+func (l *callerLogger) SetSeverity(sev Severity) {
+
+}
+
+func (l *callerLogger) GetSeverity() Severity {
+	return SeverityInfo
+}
+
+func (l *callerLogger) FormatMessage(severity Severity, caller *CallerInfo, format string, args ...interface{}) string {
+	return fmt.Sprintf("%s %s[%d] %s", severity, caller.FileName, caller.LineNo, caller.FuncName)
+}
