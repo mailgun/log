@@ -137,10 +137,10 @@ func (gl *grouplogger) Errorf(format string, args ...interface{}) {
 	}
 }
 
-// Logf logs a formatted message of the specified severity, marking it
+// Logfmt logs a formatted message of the specified severity, marking it
 // attributed to a function at the specified depth on the current goroutine
 // stack.
-func Logf(callDepth int, sev Severity, format string, args ...interface{}) {
+func Logfmt(callDepth int, sev Severity, format string, args ...interface{}) {
 	gl.Logf(callDepth, sev, format, args...)
 }
 

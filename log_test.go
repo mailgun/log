@@ -142,14 +142,14 @@ func (s *LogSuite) TestCallerInfo(c *C) {
 	}
 }
 
-func (s *LogSuite) TestCallerInfoLogf(c *C) {
+func (s *LogSuite) TestCallerInfoLogfmt(c *C) {
 	// Given
 	var l callerLogger
 	Init(&l)
 	// When
-	Logf(0, SeverityInfo, "blah")
+	Logfmt(0, SeverityInfo, "blah")
 	// Then
-	c.Assert(l.b.String(), Equals, "INFO log_test.go[150] github.com/mailgun/log.(*LogSuite).TestCallerInfoLogf")
+	c.Assert(l.b.String(), Equals, "INFO log_test.go[150] github.com/mailgun/log.(*LogSuite).TestCallerInfoLogfmt")
 }
 
 type callerLogger struct {
